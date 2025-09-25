@@ -113,6 +113,7 @@ const handleApiError = (error, res, serviceName) => {
 app.get('/weather/current', async (req, res) => {
   const { lat, lon } = req.query;
   if (!lat || !lon) return res.status(400).json({ error: 'Latitude and longitude are required.' });
+  if (!OPENWEATHER_API_KEY) return res.status(500).json({ error: 'OpenWeather API Key is missing.' });
   try {
     const apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${OPENWEATHER_API_KEY}&units=metric`;
     const response = await axios.get(apiUrl);
@@ -125,6 +126,7 @@ app.get('/weather/current', async (req, res) => {
 app.get('/weather/forecast', async (req, res) => {
   const { lat, lon } = req.query;
   if (!lat || !lon) return res.status(400).json({ error: 'Latitude and longitude are required.' });
+  if (!OPENWEATHER_API_KEY) return res.status(500).json({ error: 'OpenWeather API Key is missing.' });
   try {
     const apiUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${OPENWEATHER_API_KEY}&units=metric`;
     const response = await axios.get(apiUrl);
@@ -137,6 +139,7 @@ app.get('/weather/forecast', async (req, res) => {
 app.get('/weather/air-quality', async (req, res) => {
   const { lat, lon } = req.query;
   if (!lat || !lon) return res.status(400).json({ error: 'Latitude and longitude are required.' });
+  if (!OPENWEATHER_API_KEY) return res.status(500).json({ error: 'OpenWeather API Key is missing.' });
   try {
     // Use the standard API endpoint for air pollution data
     const apiUrl = `https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${OPENWEATHER_API_KEY}`;

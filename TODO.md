@@ -1,3 +1,4 @@
 - [x] Add OpenAI import and initialization in server.js
 - [x] Modify /analyze endpoint to add fallback to OpenAI on Gemini 429 error
 - [x] Test the server locally
+- [x] Add checks for missing API keys to prevent Netlify 502 errors
