@@ -49,7 +49,7 @@ app.post('/analyze', async (req, res) => {
 // Instead, we'll export the app for our serverless function wrapper.
 module.exports = app;
 
-// const port = 3000;
-// app.listen(port, () => {
-//   console.log(`Server with AI analysis endpoint running on http://localhost:${port}`);
-// });
+const port = 3000;
+app.listen(port, () => {
+  console.log(`Server with AI analysis endpoint running on http://localhost:${port}`);
+});

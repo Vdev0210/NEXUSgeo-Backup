@@ -396,8 +396,7 @@
                 let chatHistory = [];
 
                 // --- IMPORTANT: Replace with your actual Gemini API Key ---
-                const geminiApiKey = 'AIzaSyDV-2BFjdiBvVE2k8aewkqf8Z_dYfaNBTA'; 
-
+                // The Gemini API key is now used on the server.
                 const openWeatherApiKey = '7ee55f6de783c663f99f166dc7396cf5';
 
             // Create a slightly larger icon for the main location
@@ -765,26 +764,22 @@
                 chatHistory.push({ role: 'user', parts: [{ text: analysisPrompt }] });
 
                 try {
-                    if (geminiApiKey === 'YOUR_GEMINI_API_KEY_HERE') {
-                        throw new Error("Gemini API key is not set. Please add it to the script.");
-                    }
+                    // The backendUrl should point to where your server.js is running.
+                    // For local development, it's often http://localhost:3000
+                    const backendUrl = 'http://localhost:3000/analyze';
 
-                    const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`;
-
-                    const geminiResponse = await fetch(geminiApiUrl, {
+                    const response = await fetch(backendUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ contents: chatHistory })
+                        body: JSON.stringify({ history: chatHistory })
                     });
 
-                    if (!geminiResponse.ok) {
-                        const errorData = await geminiResponse.json();
-                        throw new Error(`Gemini API Error: ${errorData.error.message}`);
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || `Server error: ${response.status}`);
                     }
 
-                    const resultData = await geminiResponse.json();
-                    const summary = resultData.candidates[0].content.parts[0].text;
-                    const result = { summary: summary };
+                    const result = await response.json();
 
                     reportContent.innerHTML = `<p>${result.summary}</p>`;
                     chatInput.disabled = false;
@@ -801,7 +796,7 @@
 
                 } catch (error) {
                     console.error('Failed to get AI analysis from backend:', error);
-                    reportContent.innerHTML = `<p class="report-finding error"><i class="fas fa-exclamation-triangle"></i> AI analysis failed. ${error.message}</p>`;
+                    reportContent.innerHTML = `<p class="report-finding error"><i class="fas fa-exclamation-triangle"></i> AI analysis failed. ${error.message}. Make sure your backend server is running.</p>`;
                     appendMessageToChat('assistant', `AI analysis is unavailable. Error: ${error.message}`);
                     chatInput.disabled = true;
                 } finally {
@@ -891,26 +886,21 @@
                 chatMessages.scrollTop = chatMessages.scrollHeight;
 
                 try {
-                    if (geminiApiKey === 'YOUR_GEMINI_API_KEY_HERE') {
-                        throw new Error("Gemini API key is not set.");
-                    }
+                    const backendUrl = 'http://localhost:3000/analyze';
 
-                    const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`;
-
-                    const geminiResponse = await fetch(geminiApiUrl, {
+                    const response = await fetch(backendUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ contents: chatHistory })
+                        body: JSON.stringify({ history: chatHistory })
                     });
 
-                    if (!geminiResponse.ok) {
-                        const errorData = await geminiResponse.json();
-                        throw new Error(`Gemini API Error: ${errorData.error.message}`);
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || `Server error: ${response.status}`);
                     }
 
-                    const resultData = await geminiResponse.json();
-                    const summary = resultData.candidates[0].content.parts[0].text;
-                    const result = { summary: summary };
+                    const result = await response.json();
+                    const summary = result.summary;
                     
                     // Remove loading indicator and show response
                     chatMessages.removeChild(loadingEl);
@@ -921,7 +911,7 @@
 
                 } catch (error) {
                     chatMessages.removeChild(loadingEl);
-                    appendMessageToChat('assistant', 'Sorry, I could not connect to the AI service. Please ensure the backend server is running.');
+                    appendMessageToChat('assistant', `Sorry, I could not connect to the AI service. Please ensure the backend server is running. Error: ${error.message}`);
                     console.error('Failed to get chat response from backend:', error);
                 }
             }
