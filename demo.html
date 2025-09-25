@@ -485,7 +485,7 @@
 
                 return new Promise((resolve, reject) => {
                     // Calls our new backend endpoint
-                    const apiUrl = `/weather/air-quality?lat=${lat}&lon=${lng}`;
+                    const apiUrl = `/.netlify/functions/analyze/weather/air-quality?lat=${lat}&lon=${lng}`;
 
                     fetch(apiUrl)
                         .then(response => {
@@ -618,7 +618,7 @@
 
                 return new Promise((resolve, reject) => {
                     // Calls our new backend endpoint
-                    const apiUrl = `/weather/current?lat=${lat}&lon=${lng}`;
+                    const apiUrl = `/.netlify/functions/analyze/weather/current?lat=${lat}&lon=${lng}`;
 
                     fetch(apiUrl)
                         .then(response => {
@@ -692,7 +692,7 @@
             function fetchForecastWeatherData(lat, lng) {
                 return new Promise((resolve, reject) => {
                     // Calls our new backend endpoint
-                    const apiUrl = `/weather/forecast?lat=${lat}&lon=${lng}`;
+                    const apiUrl = `/.netlify/functions/analyze/weather/forecast?lat=${lat}&lon=${lng}`;
 
                     fetch(apiUrl)
                         .then(response => {
@@ -767,7 +767,7 @@
                 try {
                     // The backendUrl should point to where your server.js is running.
                     // Use a relative path for production. It will point to your Netlify function.
-                    const backendUrl = '/analyze';
+                    const backendUrl = '/.netlify/functions/analyze/analyze';
 
                     const response = await fetch(backendUrl, {
                         method: 'POST',
@@ -887,7 +887,7 @@
                 chatMessages.scrollTop = chatMessages.scrollHeight;
 
                 try {
-                    const backendUrl = '/analyze';
+                    const backendUrl = '/.netlify/functions/analyze/analyze';
 
                     const response = await fetch(backendUrl, {
                         method: 'POST',
