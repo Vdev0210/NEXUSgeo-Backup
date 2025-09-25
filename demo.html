@@ -765,8 +765,8 @@
 
                 try {
                     // The backendUrl should point to where your server.js is running.
-                    // For local development, it's often http://localhost:3000
-                    const backendUrl = 'http://localhost:3000/analyze';
+                    // Use a relative path for production. It will point to your Netlify function.
+                    const backendUrl = '/.netlify/functions/analyze';
 
                     const response = await fetch(backendUrl, {
                         method: 'POST',
@@ -886,7 +886,7 @@
                 chatMessages.scrollTop = chatMessages.scrollHeight;
 
                 try {
-                    const backendUrl = 'http://localhost:3000/analyze';
+                    const backendUrl = '/.netlify/functions/analyze';
 
                     const response = await fetch(backendUrl, {
                         method: 'POST',
