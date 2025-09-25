@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NASA Hackathon - Home</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Login Check -->
+    <div id="loginCheck" class="login-check" style="display: none;">
+        <div class="login-overlay">
+            <div class="login-prompt">
+                <h2>Access Restricted</h2>
+                <p>Please log in to access this NASA Hackathon platform.</p>
+                <button onclick="window.location.href='login.html'" class="login-btn">Login</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <a href="home.html" class="logo" aria-label="Home">
+                <i class="fas fa-rocket"></i>
+                <span>NEXUS <span class="logo-geo">geo</span></span>
+            </a>
+            <nav class="nav">
+                <div class="nav-toggle">
+                    <i class="fas fa-bars"></i>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="home.html" class="nav-link active">HOME</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="problem.html" class="nav-link">PROBLEM STATEMENT</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="solution.html" class="nav-link">SOLUTION</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="features.html" class="nav-link">FEATURES</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="impact.html" class="nav-link">IMPACT</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="data-sources.html" class="nav-link">DATA SOURCES</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="demo.html" class="nav-link">DEMO</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="team.html" class="nav-link">TEAM</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="contact.html" class="nav-link">CONTACT</a></li>
+                </ul>
+                <div class="user-controls">
+                    <button id="logoutBtn" class="logout-btn" style="display: none;">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <section class="hero-section">
+                <div class="hero">
+                    <h1>Smart Pathways for Healthy Cities</h1>
+                    <p class="hero-subtitle">We combine NASA Earth Observation data with urban planning intelligence to enable climate-resilient, people-first cities. Includes a secondary real-time air-quality forecasting feature powered by NASA TEMPO and ground sensors.</p>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <span class="stat-number">24/7</span>
+                            <span class="stat-label">Monitoring</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">99.9%</span>
+                            <span class="stat-label">Accuracy</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">50TB+</span>
+                            <span class="stat-label">Data Daily</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="overview">
+                    <h2>Our Mission</h2>
+                    <p>Climate change and rapid urbanization threaten city wellbeing. Our platform turns NASA Earth data into practical planning actions: mapping growth, identifying vulnerabilities, and forecasting air quality so city leaders and communities can act before harm occurs.</p>
+
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <i class="fas fa-city"></i>
+                            <h3>Urban Planning Intelligence</h3>
+                            <p>AI-powered analysis for sustainable city development</p>
+                        </div>
+                        <div class="feature-card">
+                            <i class="fas fa-leaf"></i>
+                            <h3>Climate Resilience</h3>
+                            <p>Environmental monitoring for climate adaptation strategies</p>
+                        </div>
+                        <div class="feature-card">
+                            <i class="fas fa-wind"></i>
+                            <h3>Air Quality Forecasting</h3>
+                            <p>Real-time pollution monitoring and health alerts</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <h4>NASA Hackathon Project</h4>
+                    <p>Empowering the future of Earth observation through innovative technology</p>
+                </div>
+                <div class="footer-links">
+                    <a href="home.html">Home</a>
+                    <a href="contact.html">Contact</a>
+                    <a href="data-sources.html">Data Sources</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 NASA Hackathon Team. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

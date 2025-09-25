@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NASA Hackathon - AI Analysis</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Login Check -->
+    <div id="loginCheck" class="login-check" style="display: none;">
+        <div class="login-overlay">
+            <div class="login-prompt">
+                <h2>Access Restricted</h2>
+                <p>Please log in to access this NASA Hackathon platform.</p>
+                <button onclick="window.location.href='login.html'" class="login-btn">Login</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <a href="home.html" class="logo" aria-label="Home">
+                <i class="fas fa-rocket"></i>
+                <span>NEXUS <span class="logo-geo">geo</span></span>
+            </a>
+            <nav class="nav">
+                <div class="nav-toggle">
+                    <i class="fas fa-bars"></i>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="home.html" class="nav-link">HOME</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="problem.html" class="nav-link">PROBLEM STATEMENT</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="solution.html" class="nav-link">SOLUTION</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="features.html" class="nav-link">FEATURES</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="impact.html" class="nav-link">IMPACT</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="data-sources.html" class="nav-link">DATA SOURCES</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="demo.html" class="nav-link">DEMO</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="ai-analysis.html" class="nav-link active">AI ANALYSIS</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="team.html" class="nav-link">TEAM</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="contact.html" class="nav-link">CONTACT</a></li>
+                </ul>
+                <div class="user-controls">
+                    <button id="logoutBtn" class="logout-btn" style="display: none;">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <section class="ai-analysis-section">
+                <h2>AI-Generated Regional Analysis</h2>
+                <p class="hero-subtitle">Explore pre-generated AI reports for key regions, showcasing urban and environmental insights derived from NASA data.</p>
+
+                <div class="ai-analysis-controls">
+                    <h3>Select a Region</h3>
+                    <select id="regionSelect" class="demo-select">
+                        <option value="">-- Choose a Region --</option>
+                        <option value="delhi">Delhi, India</option>
+                        <option value="kerala">Kerala, India</option>
+                        <option value="mumbai">Mumbai, India</option>
+                        <option value="bangalore">Bangalore, India</option>
+                        <option value="kolkata">Kolkata, India</option>
+                        <option value="chennai">Chennai, India</option>
+                        <option value="hyderabad">Hyderabad, India</option>
+                    </select>
+                </div>
+
+                <div id="analysis-display" class="analysis-display-container" style="display:none;">
+                    <h3 id="analysis-title"></h3>
+                    <div id="analysis-content" class="features-grid">
+                        <!-- Analysis cards will be injected here -->
+                    </div>
+                </div>
+
+                <div id="methodology-section" class="methodology-insights" style="display:none;">
+                    <h2>Methodology Insights</h2>
+                    <p id="methodology-subtitle" class="hero-subtitle"></p>
+                    <div class="features-grid">
+                        <div id="methodology-services" class="feature-card">
+                            <i class="fas fa-map-marked-alt"></i>
+                            <h3>Access to Essential Services</h3>
+                            <p></p>
+                        </div>
+                        <div id="methodology-pollution" class="feature-card">
+                            <i class="fas fa-smog"></i>
+                            <h3>Identifying & Addressing Pollution</h3>
+                            <p></p>
+                        </div>
+                        <div id="methodology-healthcare" class="feature-card">
+                            <i class="fas fa-hospital-user"></i>
+                            <h3>Siting New Healthcare Facilities</h3>
+                            <p></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <h4>NASA Hackathon Project</h4>
+                    <p>Empowering the future of Earth observation through innovative technology</p>
+                </div>
+                <div class="footer-links">
+                    <a href="home.html">Home</a>
+                    <a href="contact.html">Contact</a>
+                    <a href="data-sources.html">Data Sources</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 NASA Hackathon Team. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const analysisData = {
+                delhi: {
+                    name: "Delhi, India",
+                    categories: {
+                        'Living Standards': { icon: 'fa-home', summary: 'High-density housing (11,320 people/km²) with affordability challenges. Robust metro (390km) and road networks face heavy congestion.' },
+                        'Pollution': { icon: 'fa-smog', summary: 'Critically high air pollution. Winter PM2.5 often exceeds 300 µg/m³ (AQI >350). High NO2 levels near traffic corridors. Average summer temp: 35-42°C.' },
+                        'Infrastructure': { icon: 'fa-road', summary: 'Extensive road and metro network. Power grid demand peaks at ~7,400 MW in summer, causing strain. Water pressure is inconsistent in outer zones.' },
+                        'Impacts & Accessibility': { icon: 'fa-hospital', summary: 'High concentration of healthcare facilities, but public hospital bed density is 2.1 per 1000 people, indicating a service gap.' },
+                        'Management': { icon: 'fa-recycle', summary: 'Generates ~11,000 tonnes of waste daily, with landfill capacity critically exceeded. Water management focuses on reducing reliance on groundwater.' },
+                        'Development': { icon: 'fa-building', summary: 'Rapid vertical development. High potential for smart city tech to manage traffic (average speed <25 km/h) and pollution.' },
+                        'Measures & Preventions': { icon: 'fa-shield-alt', summary: 'Measures include vehicle restrictions (odd-even scheme) and smog towers. Focus on increasing green cover from current 21%.' }
+                    }
+                },
+                kerala: {
+                    name: "Kerala, India",
+                    categories: {
+                        'Living Standards': { icon: 'fa-home', summary: 'High Human Development Index (0.784). Housing is widespread but 30% of coastal areas are vulnerable to flooding. Average temp: 28-32°C.' },
+                        'Pollution': { icon: 'fa-water', summary: 'Water pollution from agricultural runoff (high pesticide content) is a concern. Air quality is generally good (AQI < 100) but declining in Kochi.' },
+                        'Infrastructure': { icon: 'fa-road', summary: 'Well-connected road network (density 548 km/100 km²), but narrow and congested. Significant investment in waterway infrastructure.' },
+                        'Impacts & Accessibility': { icon: 'fa-hospital', summary: 'Excellent healthcare accessibility (1.5 beds/1000 people) and high literacy rate (96.2%). A model for the country.' },
+                        'Management': { icon: 'fa-recycle', summary: 'Focus on eco-tourism and sustainable land management. Generates 8,500 tonnes of waste daily, with processing capacity at 40%.' },
+                        'Development': { icon: 'fa-tree', summary: 'Focus on tourism, IT, and sustainable agriculture. High potential for renewable energy, with current solar capacity at ~300 MW.' },
+                        'Measures & Preventions': { icon: 'fa-shield-alt', summary: 'Strong focus on flood prevention with GIS mapping. Measures to control plastic waste (bans on single-use items) are actively promoted.' }
+                    }
+                },
+                mumbai: {
+                    name: "Mumbai, India",
+                    categories: {
+                        'Living Standards': { icon: 'fa-home', summary: 'Extreme population density (25,357 people/km²). Local trains carry 7.5 million commuters daily, leading to severe overcrowding.' },
+                        'Pollution': { icon: 'fa-smog', summary: 'Moderate to high air pollution (AQI 150-250). High NO2 from traffic. Coastal waters show high levels of microplastics. Average pressure: 1010 hPa.' },
+                        'Infrastructure': { icon: 'fa-road', summary: 'Coastal road projects and a growing metro (Line 3 is 33.5km). Infrastructure is strained by a population of 20 million+.' },
+                        'Impacts & Accessibility': { icon: 'fa-hospital', summary: 'Excellent private hospitals, but public healthcare is overburdened (0.8 beds/1000 people). A major hub for finance and commerce.' },
+                        'Management': { icon: 'fa-recycle', summary: 'Generates 7,000-9,000 tonnes of waste daily. Water supply of 3,850 million litres per day is managed via a network of 6 lakes.' },
+                        'Development': { icon: 'fa-building', summary: 'Continuous vertical development and land reclamation. Focus on improving public transport and creating new business districts.' },
+                        'Measures & Preventions': { icon: 'fa-shield-alt', summary: 'Monsoon preparedness for ~2,400 mm of annual rainfall is critical. Policies are in place to reduce plastic use and manage industrial emissions.' }
+                    }
+                },
+                bangalore: {
+                    name: "Bangalore (Bengaluru), India",
+                    categories: {
+                        'Living Standards': { icon: 'fa-laptop', summary: 'India\'s Silicon Valley, offering high-tech employment. Faces severe traffic congestion (average speed 15 km/h). Average temp: 20-30°C.' },
+                        'Pollution': { icon: 'fa-car', summary: 'High levels of air pollution (AQI 100-180) from traffic. Bellandur Lake shows high levels of phosphates (2.5 mg/L) and low dissolved oxygen.' },
+                        'Infrastructure': { icon: 'fa-road', summary: 'Road infrastructure struggles with rapid growth. Namma Metro (56km) is expanding but does not yet cover all key tech corridors.' },
+                        'Impacts & Accessibility': { icon: 'fa-hospital', summary: 'Excellent healthcare and educational institutions. A major hub for IT, attracting talent from across the country.' },
+                        'Management': { icon: 'fa-recycle', summary: 'Generates ~5,000 tonnes of waste daily, with only 50% processed effectively. Water scarcity is a growing concern, with a deficit of ~500 MLD.' },
+                        'Development': { icon: 'fa-building', summary: 'Rapid real estate development in tech corridors. High potential for smart city solutions to manage traffic and utilities.' },
+                        'Measures & Preventions': { icon: 'fa-shield-alt', summary: 'Focus on promoting electric vehicles and improving public transport. Citizen-led initiatives for lake rejuvenation are prominent.' }
+                    }
+                },
+                kolkata: {
+                    name: "Kolkata, India",
+                    categories: {
+                        'Living Standards': { icon: 'fa-tram', summary: 'Affordable cost of living. Trams are a unique feature of its public transport. Population density is high at 24,000 people/km².' },
+                        'Pollution': { icon: 'fa-smog', summary: 'Air pollution is a major issue, with winter PM2.5 levels reaching 250 µg/m³ (AQI >300). Hooghly river shows high coliform bacteria levels.' },
+                        'Infrastructure': { icon: 'fa-road', summary: 'The metro system (33km) is one of the oldest in India and is expanding. Road infrastructure is aging and faces congestion challenges.' },
+                        'Impacts & Accessibility': { icon: 'fa-hospital', summary: 'A major center for culture and education. Healthcare facilities are widespread but public system is strained (0.6 beds/1000 people).' },
+                        'Management': { icon: 'fa-recycle', summary: 'Generates ~4,000 tonnes of waste daily. Drainage systems are a key challenge during monsoons, with annual rainfall of ~1,600 mm.' },
+                        'Development': { icon: 'fa-building', summary: 'New townships are developing on the periphery. Focus on preserving heritage structures while promoting modern economic growth.' },
+                        'Measures & Preventions': { icon: 'fa-shield-alt', summary: 'Measures to combat air pollution include restrictions on old vehicles. Improving the drainage system is a key priority.' }
+                    }
+                },
+                chennai: {
+                    name: "Chennai, India",
+                    categories: {
+                        'Living Standards': { icon: 'fa-industry', summary: 'A major industrial and IT hub. Faces significant water scarcity, with reservoir levels often below 20%. Average temp: 28-38°C.' },
+                        'Pollution': { icon: 'fa-water', summary: 'Coastal pollution and industrial pollution (high heavy metal content in water) are major concerns. Air quality (AQI 80-150) is deteriorating.' },
+                        'Infrastructure': { icon: 'fa-road', summary: 'Well-developed road network and a growing metro system (54km). The city is a major port, handling over 100 million tonnes of cargo annually.' },
+                        'Impacts & Accessibility': { icon: 'fa-hospital', summary: 'Known for high-quality healthcare, attracting medical tourism. Strong base for engineering education.' },
+                        'Management': { icon: 'fa-recycle', summary: 'Water management is critical, with two desalination plants producing 200 MLD. Generates ~5,200 tonnes of waste daily.' },
+                        'Development': { icon: 'fa-building', summary: 'Significant industrial and IT corridor development along the OMR. The city is expanding along the southern coast.' },
+                        'Measures & Preventions': { icon: 'fa-shield-alt', summary: 'Strong emphasis on mandatory rainwater harvesting. Coastal zone management plans are in place to mitigate climate change effects.' }
+                    }
+                },
+                hyderabad: {
+                    name: "Hyderabad, India",
+                    categories: {
+                        'Living Standards': { icon: 'fa-gem', summary: 'A hub for IT and pharma with a high standard of living and affordable cost. Population density is ~18,480 people/km².' },
+                        'Pollution': { icon: 'fa-industry', summary: 'Air pollution from traffic and industrial zones is a growing concern (AQI 100-160). Hussain Sagar lake shows high levels of heavy metals.' },
+                        'Infrastructure': { icon: 'fa-road', summary: 'The 158km Outer Ring Road has improved connectivity. The metro system (69km) is expanding to ease traffic congestion.' },
+                        'Impacts & Accessibility': { icon: 'fa-hospital', summary: 'A major center for healthcare and education. The HITEC City area is a major employment hub for over 500,000 IT professionals.' },
+                        'Management': { icon: 'fa-recycle', summary: 'Generates ~4,500 tonnes of waste daily, with a focus on waste-to-energy plants. Water supply from Godavari and Krishna rivers is critical.' },
+                        'Development': { icon: 'fa-building', summary: 'Rapid development of IT parks and pharma SEZs. The "Pharma City" project aims to be the world\'s largest integrated pharma park.' },
+                        'Measures & Preventions': { icon: 'fa-shield-alt', summary: 'Strategic urban planning to develop satellite townships. Promotion of green buildings (high number of LEED-certified buildings).' }
+                    }
+                }
+            };
+
+            const regionSelect = document.getElementById('regionSelect');
+            const analysisDisplay = document.getElementById('analysis-display');
+            const analysisTitle = document.getElementById('analysis-title');
+            const analysisContent = document.getElementById('analysis-content');
+            const methodologySection = document.getElementById('methodology-section');
+
+            function generateMethodologyInsights(regionData) {
+                const { name, categories } = regionData;
+
+                document.getElementById('methodology-subtitle').textContent = `Based on the data for ${name}, here is how a planner might take action:`;
+
+                // Services Insight
+                const servicesCard = document.getElementById('methodology-services').querySelector('p');
+                servicesCard.textContent = `Given the challenges in 'Living Standards' (${categories['Living Standards'].summary.toLowerCase()}), a planner should analyze transit routes against housing density maps to identify areas needing better transportation links or affordable housing projects.`;
+
+                // Pollution Insight
+                const pollutionCard = document.getElementById('methodology-pollution').querySelector('p');
+                pollutionCard.textContent = `The 'Pollution' data (${categories['Pollution'].summary.toLowerCase()}) points to specific issues. Planners can use NASA's TEMPO/MODIS data to pinpoint pollution sources and recommend targeted solutions like green buffers or stricter industrial zoning.`;
+
+                // Healthcare Insight
+                const healthcareCard = document.getElementById('methodology-healthcare').querySelector('p');
+                healthcareCard.textContent = `Based on 'Impacts & Accessibility' (${categories['Impacts & Accessibility'].summary.toLowerCase()}), planners can map existing clinics against population density to find "healthcare deserts" and propose locations for new facilities to ensure equitable access.`;
+
+                methodologySection.style.display = 'block';
+            }
+
+            regionSelect.addEventListener('change', (e) => {
+                const selectedRegion = e.target.value;
+                if (selectedRegion && analysisData[selectedRegion]) {
+                    const data = analysisData[selectedRegion];
+                    analysisTitle.textContent = `Analysis for ${data.name}`;
+                    analysisContent.innerHTML = ''; // Clear previous content
+
+                    for (const category in data.categories) {
+                        const item = data.categories[category];
+                        const card = document.createElement('div');
+                        card.className = 'feature-card'; // Re-using existing style
+                        card.innerHTML = `
+                            <i class="fas ${item.icon}"></i>
+                            <h3>${category}</h3>
+                            <p>${item.summary}</p>
+                        `;
+                        analysisContent.appendChild(card);
+                    }
+
+                    analysisDisplay.style.display = 'block';
+                    generateMethodologyInsights(data);
+                } else {
+                    analysisDisplay.style.display = 'none';
+                    methodologySection.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

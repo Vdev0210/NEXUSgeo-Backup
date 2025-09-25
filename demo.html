@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NASA Hackathon - Demo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    <!-- MapLibre GL JS -->
+    <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
+    <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
+    <!-- Mapbox GL Leaflet plugin to integrate MapLibre with Leaflet -->
+    <script src="https://unpkg.com/mapbox-gl-leaflet/leaflet-mapbox-gl.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet.awesome-markers@2.0.2/dist/leaflet.awesome-markers.min.js"></script>
+</head>
+<style>
+    /* Weather Legend Animation Styles */
+    .weather-animation-container {
+        position: relative;
+        width: 100%;
+        height: 60px;
+        overflow: hidden;
+        border-radius: 8px;
+        background: linear-gradient(to bottom, #3a7bd5, #00d2ff);
+        margin-bottom: 8px;
+    }
+
+    .sun {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 30px;
+        height: 30px;
+        background: #ffeb3b;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        box-shadow: 0 0 20px #ffeb3b;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { transform: translate(-50%, -50%) scale(1); }
+        50% { transform: translate(-50%, -50%) scale(1.1); }
+        100% { transform: translate(-50%, -50%) scale(1); }
+    }
+
+    .cloud {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 50%;
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        animation: move-clouds linear infinite;
+    }
+
+    .cloud.base { width: 100px; height: 30px; top: 25px; left: -100px; animation-duration: 20s; }
+    .cloud.middle { width: 80px; height: 25px; top: 15px; left: -80px; animation-duration: 15s; animation-delay: -5s; }
+    .cloud.top { width: 60px; height: 20px; top: 5px; left: -60px; animation-duration: 10s; animation-delay: -2s; }
+
+    .cloud::before, .cloud::after {
+        content: '';
+        position: absolute;
+        background: inherit;
+        border-radius: inherit;
+    }
+
+    .cloud::before {
+        width: 50%;
+        height: 150%;
+        top: -75%;
+        left: 25%;
+    }
+
+    .cloud::after {
+        width: 70%;
+        height: 200%;
+        top: -100%;
+        right: 15%;
+    }
+
+    @keyframes move-clouds {
+        from { left: -150px; }
+        to { left: 100%; }
+    }
+
+    .rain {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    .raindrop {
+        position: absolute;
+        bottom: 100%;
+        width: 1px;
+        height: 10px;
+        background: rgba(255, 255, 255, 0.6);
+        animation: rain-fall linear infinite;
+    }
+
+    @keyframes rain-fall {
+        to {
+            transform: translateY(200px);
+        }
+    }
+
+    .drizzle::before {
+        background-size: 2px 5px, 5px 2px;
+    }
+
+    .snow {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+    }
+
+    .snow::before {
+        content: '❄';
+        position: absolute;
+        color: white;
+        font-size: 20px;
+        animation: fall 10s linear infinite;
+        left: 20%;
+    }
+    .snow::after {
+        content: '❄';
+        position: absolute;
+        color: white;
+        font-size: 15px;
+        animation: fall 15s linear infinite reverse;
+        left: 60%;
+    }
+
+    @keyframes fall {
+        from { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+        to { transform: translateY(80px) rotate(360deg); opacity: 0; }
+    }
+
+    .thunderstorm {
+        background: #2c3e50;
+        animation: flash 1.5s infinite;
+    }
+
+    @keyframes flash {
+        0%, 100% { background: #2c3e50; }
+        50% { background: #bdc3c7; }
+    }
+
+    .fog {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.3);
+        animation: fog-move 5s infinite alternate;
+    }
+
+    @keyframes fog-move {
+        from { opacity: 0.2; }
+        to { opacity: 0.6; }
+    }
+
+</style>
+<body>
+    <!-- Login Check -->
+    <div id="loginCheck" class="login-check" style="display: none;">
+        <div class="login-overlay">
+            <div class="login-prompt">
+                <h2>Access Restricted</h2>
+                <p>Please log in to access this NASA Hackathon platform.</p>
+                <button onclick="window.location.href='login.html'" class="login-btn">Login</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <a href="home.html" class="logo" aria-label="Home">
+                <i class="fas fa-rocket"></i>
+                <span>NEXUS <span class="logo-geo">geo</span></span>
+            </a>
+            <nav class="nav">
+                <div class="nav-toggle">
+                    <i class="fas fa-bars"></i>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="home.html" class="nav-link">HOME</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="problem.html" class="nav-link">PROBLEM STATEMENT</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="solution.html" class="nav-link">SOLUTION</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="features.html" class="nav-link">FEATURES</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="impact.html" class="nav-link">IMPACT</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="data-sources.html" class="nav-link">DATA SOURCES</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="demo.html" class="nav-link active">DEMO</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="team.html" class="nav-link">TEAM</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="contact.html" class="nav-link">CONTACT</a></li>
+                </ul>
+                <div class="user-controls">
+                    <button id="logoutBtn" class="logout-btn" style="display: none;">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <section class="demo-section">
+                <h2>Live Demo</h2>
+                <div class="demo-content">
+                    <div class="demo-intro">
+                        <h3>Experience Our Platform</h3>
+                        <p>Explore our interactive demo showcasing real-time air quality monitoring and urban planning intelligence powered by NASA Earth observations.</p>
+                    </div>
+
+                    <div class="demo-layout">
+                        <div class="demo-left" style="overflow: hidden;">
+                            <div class="demo-controls">
+                                <h3>Demo Controls</h3>
+                                <div class="demo-options">
+                                    <div class="location-menu">
+                                        <button id="currentLocationBtn" class="demo-btn">
+                                            <i class="fas fa-map-marker-alt"></i> Use Current Location
+                                        </button>
+                                        <div class="manual-location">
+                                            <div class="location-input-container">
+                                                <input type="text" id="manualLocationInput" class="demo-input" placeholder="Enter location (e.g., New York, NY)" autocomplete="off">
+                                                <div id="locationSuggestions" class="location-suggestions"></div>
+                                            </div>
+                                            <button id="manualLocationBtn" class="demo-btn">
+                                                <i class="fas fa-search"></i> Set Location
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="demo-display">
+                                <div class="satellite-map">
+                                    <div id="interactive-city-map" style="height:100%; width:100%;"></div>
+                                </div>
+
+                                <div class="demo-info">
+                                    <h4>Current Location</h4>
+                                    <div class="data-info">
+                                        <p><strong>Location:</strong> <span id="currentLocation">Los Angeles, CA</span></p>
+                                        <p><strong>Coordinates:</strong> <span id="coordinates">N/A</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="demo-right">
+                            <div class="demo-right-content">
+                            <div class="demo-info-right">
+                                <h4>Air Quality Update</h4>
+                                <div class="data-info">
+                                    <div id="airQualityData"><p>Select a location to see air quality data.</p></div>
+                                    <p><strong>Last Updated:</strong> <span id="lastUpdate">N/A</span></p>
+                                </div>
+                                <div class="data-info">
+                                    <p><strong>Status:</strong> <span id="dataStatus" class="status-good">Ready</span></p>
+                                </div>
+                            </div>
+
+                            <div class="demo-info-right">
+                                <h4>Current Weather</h4>
+                                <div id="weatherData" class="data-info">
+                                    <p>Select a location to see weather data.</p>
+                                </div>
+                            </div>
+
+                            <div id="aiReport" class="ai-report" style="display: none;">
+                                <h4><i class="fas fa-robot"></i> AI Analysis Report</h4>
+                                <div id="aiReportContent" class="results-content">
+                                    <p>Select a location to generate an AI analysis of the air quality.</p>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chatbot Section -->
+                    <div id="chatbot" class="chatbot-container" style="margin-top: 2rem;">
+                        <h4><i class="fas fa-comments"></i> Chat with AI Assistant</h4>
+                        <div id="chatMessages" class="chat-messages">
+                            <div class="chat-message assistant-message">Please select a location on the map to begin the analysis and start a conversation.</div>
+                        </div>
+                        <div class="chat-input-container">
+                            <input type="text" id="chatInput" class="demo-input" placeholder="Ask a follow-up question..." autocomplete="off">
+                            <button id="chatSendBtn" class="demo-btn"><i class="fas fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="demo-features">
+                        <h3>Demo Features</h3>
+                        <div class="features-grid">
+                            <div class="feature-card">
+                                <i class="fas fa-clock"></i>
+                                <h4>Real-time Updates</h4>
+                                <p>Live data streaming from NASA satellites and ground sensors</p>
+                            </div>
+                            <div class="feature-card">
+                                <i class="fas fa-chart-area"></i>
+                                <h4>Interactive Visualization</h4>
+                                <p>Dynamic maps showing environmental conditions across cities</p>
+                            </div>
+                            <div class="feature-card">
+                                <i class="fas fa-bell"></i>
+                                <h4>Alert Simulation</h4>
+                                <p>Test air quality alerts and health recommendations</p>
+                            </div>
+                            <div class="feature-card">
+                                <i class="fas fa-mobile-alt"></i>
+                                <h4>Mobile Responsive</h4>
+                                <p>Experience the platform as users would on mobile devices</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="demo-note">
+                        <h3>Demo Information</h3>
+                        <p><strong>Note:</strong> This is a demonstration environment showcasing the capabilities of our NASA-powered urban environmental intelligence platform. The data shown is simulated for demonstration purposes but represents the type of real-time information our system would provide in a production environment.</p>
+                        <p>For the full experience, our platform integrates with actual NASA APIs including TEMPO, MODIS, and VIIRS satellite data, providing real-time environmental monitoring and forecasting.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <h4>NASA Hackathon Project</h4>
+                    <p>Empowering the future of Earth observation through innovative technology</p>
+                </div>
+                <div class="footer-links">
+                    <a href="home.html">Home</a>
+                    <a href="contact.html">Contact</a>
+                    <a href="data-sources.html">Data Sources</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 NASA Hackathon Team. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            (function() {
+                const currentLocationBtn = document.getElementById('currentLocationBtn');
+                const manualLocationBtn = document.getElementById('manualLocationBtn');
+                const manualLocationInput = document.getElementById('manualLocationInput');
+                const locationSuggestions = document.getElementById('locationSuggestions');
+    
+                const map = L.map('interactive-city-map').setView([34.0522, -118.2437], 12);
+                const chatMessages = document.getElementById('chatMessages');
+                const chatInput = document.getElementById('chatInput');
+                const chatSendBtn = document.getElementById('chatSendBtn');
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+    
+                const legend = L.control({ position: 'bottomright' });
+    
+                legend.onAdd = function (map) {
+                    const div = L.DomUtil.create('div', 'info legend');
+                    return div;
+                };
+    
+                legend.addTo(map);
+    
+                let locationMarker;
+                let poiMarkers = []; // To store POI markers
+                let currentLocation = { name: 'Los Angeles, CA', lat: 34.0522, lng: -118.2437 };
+                let chatHistory = [];
+
+                // --- IMPORTANT: Replace with your actual Gemini API Key ---
+                const geminiApiKey = 'AIzaSyDV-2BFjdiBvVE2k8aewkqf8Z_dYfaNBTA'; 
+
+                const openWeatherApiKey = '7ee55f6de783c663f99f166dc7396cf5';
+
+            // Create a slightly larger icon for the main location
+            const mainLocationIcon = L.icon({
+                iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+                iconSize: [30, 48], // Larger than default [25, 41]
+                iconAnchor: [15, 48],
+                popupAnchor: [0, -48]
+            });
+
+            function updateFromSelections(addMarker = false) {
+                const loc = currentLocation;
+
+                if (!loc) return;
+
+                // Update info panel
+                const currentLocationEl = document.getElementById('currentLocation');
+                const coordinatesEl = document.getElementById('coordinates');
+                const currentDataTypeEl = document.getElementById('currentDataType');
+                const lastUpdateEl = document.getElementById('lastUpdate');
+                const dataStatusEl = document.getElementById('dataStatus');
+
+                if (currentLocationEl) currentLocationEl.textContent = loc.name;
+                if (coordinatesEl) coordinatesEl.textContent = `${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)}`;
+                if (currentDataTypeEl) currentDataTypeEl.textContent = 'Air Quality'; // Hardcoded value
+                if (dataStatusEl) dataStatusEl.textContent = 'Ready';
+
+                if (addMarker) {
+                    if (locationMarker) {
+                        map.removeLayer(locationMarker);
+                    }
+                    locationMarker = L.marker([loc.lat, loc.lng], { icon: mainLocationIcon })
+                        .addTo(map)
+                        .bindPopup(`<b>Selected Location:</b><br>${loc.name}`)
+                        .openPopup();
+                }
+
+                map.setView([loc.lat, loc.lng], 12);
+
+                // Show initial loading state for AI report
+                const reportContainer = document.getElementById('aiReport');
+                const reportContent = document.getElementById('aiReportContent');
+                if (reportContainer) reportContainer.style.display = 'block';
+                if (reportContent) reportContent.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Fetching environmental data...</p>';
+
+                // Fetch all data and then run analysis
+                Promise.allSettled([
+                    fetchAirQualityData(loc.lat, loc.lng),
+                    fetchCurrentWeatherData(loc.lat, loc.lng),
+                    fetchForecastWeatherData(loc.lat, loc.lng)
+                ]).then((results) => {
+                    const [airData, weatherData, forecastData] = results.map(r => r.status === 'fulfilled' ? r.value : null);
+                    runInitialAiAnalysis(airData, weatherData, forecastData);
+                }).catch(error => {
+                    console.error("Failed to fetch all data for AI analysis:", error);
+                    const reportContent = document.getElementById('aiReportContent');
+                    if (reportContent) {
+                        reportContent.innerHTML = `<p class="report-finding error"><i class="fas fa-exclamation-triangle"></i> Could not fetch all required data for analysis. Please try again.</p>`;
+                    }
+                });
+            }
+
+            function getCurrentLocation() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            const lat = position.coords.latitude;
+                            const lng = position.coords.longitude;
+                            currentLocation = { name: `Current Location (${lat.toFixed(4)}, ${lng.toFixed(4)})`, lat, lng };
+                            document.getElementById('currentLocation').textContent = currentLocation.name;
+                            updateFromSelections(true);
+                        },
+                        (error) => {
+                            alert('Error getting current location: ' + error.message);
+                        }
+                    );
+                } else {
+                    alert('Geolocation is not supported by this browser.');
+                }
+            }
+
+            function fetchAirQualityData(lat, lng) {
+                const airQualityDataEl = document.getElementById('airQualityData');
+                const lastUpdateEl = document.getElementById('lastUpdate');
+
+                if (airQualityDataEl) airQualityDataEl.innerHTML = '<p>Fetching air quality data...</p>';
+                if (lastUpdateEl) lastUpdateEl.textContent = '...';
+
+                return new Promise((resolve, reject) => {
+                    const apiUrl = `https://pro.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lng}&appid=${openWeatherApiKey}`;
+
+                    fetch(apiUrl)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`OpenWeather API error: ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.list && data.list.length > 0) {
+                                const aqi = data.list[0].main.aqi;
+                                const components = data.list[0].components;
+                                let status = 'Unknown';
+                                const aqiMap = {1: 'Good', 2: 'Fair', 3: 'Moderate', 4: 'Poor', 5: 'Very Poor'};
+                                status = aqiMap[aqi] || 'Unknown';
+
+                                let html = `<p><strong>AQI:</strong> ${aqi} (${status})</p>`;
+                                html += '<h5>Pollutant Concentration (μg/m³):</h5>';
+                                html += '<ul class="pollutant-list">';
+                                html += `<li><strong>CO:</strong> ${components.co}</li>`;
+                                html += `<li><strong>NO:</strong> ${components.no}</li>`;
+                                html += `<li><strong>NO₂:</strong> ${components.no2}</li>`;
+                                html += `<li><strong>O₃:</strong> ${components.o3}</li>`;
+                                html += `<li><strong>SO₂:</strong> ${components.so2}</li>`;
+                                html += `<li><strong>PM2.5:</strong> ${components.pm2_5}</li>`;
+                                html += `<li><strong>PM10:</strong> ${components.pm10}</li>`;
+                                html += `<li><strong>NH₃:</strong> ${components.nh3}</li>`;
+                                html += '</ul>';
+
+                                if (airQualityDataEl) airQualityDataEl.innerHTML = html;
+                                if (lastUpdateEl) lastUpdateEl.textContent = new Date().toLocaleString();
+
+                                // Resolve the promise with the fetched data
+                                resolve(data.list[0]);
+                            } else {
+                                throw new Error('No air quality data returned.');
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Error fetching air quality data:', err);
+                            if (airQualityDataEl) {
+                                airQualityDataEl.innerHTML = '<p>Could not fetch air quality data.</p>';
+                            }
+                            if (lastUpdateEl) lastUpdateEl.textContent = new Date().toLocaleString();
+
+                            L.popup()
+                              .setLatLng([lat, lng])
+                              .setContent(`Could not fetch Air Quality data from OpenWeather.<br>Error: ${err.message}`)
+                              .openOn(map);
+                            reject(err);
+                        });
+                });
+            }
+
+            function updateLegend(weather) {
+                const legendDiv = document.querySelector('.info.legend');
+                if (!legendDiv) return;
+
+                const main = weather.main;
+                const description = weather.description;
+
+                let animationHtml = '';
+                let weatherTitle = main;
+
+                switch (main) {
+                    case 'Rain': // Fall-through
+                    case 'Drizzle':
+                        animationHtml = `
+                            <div class="cloud base"></div>
+                            <div class="cloud middle"></div>
+                            <div class="cloud top"></div>
+                            <div class="rain"></div>
+                        `;
+                        weatherTitle = main;
+                        break;
+                    case 'Clouds':
+                        animationHtml = `
+                            <div class="cloud base"></div>
+                            <div class="cloud middle"></div>
+                            <div class="cloud top"></div>
+                        `;
+                        break;
+                    case 'Clear':
+                        animationHtml = '<div class="sun"></div>';
+                        weatherTitle = 'Clear Sky';
+                        break;
+                    case 'Snow':
+                        animationHtml = '<div class="snow"></div>';
+                        break;
+                    case 'Thunderstorm':
+                        animationHtml = '<div class="thunderstorm"></div>';
+                        break;
+                    case 'Mist':
+                    case 'Smoke':
+                    case 'Haze':
+                    case 'Dust':
+                    case 'Fog':
+                    case 'Sand':
+                    case 'Ash':
+                    case 'Squall':
+                    case 'Tornado':
+                        animationHtml = '<div class="fog"></div>';
+                        weatherTitle = 'Low Visibility';
+                        break;
+                    default:
+                        animationHtml = `<p style="text-align:center; padding-top: 20px;">${main}</p>`;
+                }
+
+                legendDiv.innerHTML = `<h4>${weatherTitle}</h4><div class="weather-animation-container">${animationHtml}</div><p style="text-align:center; font-size: 0.9rem; margin:0;">${description}</p>`;
+
+                // If it's raining, dynamically add raindrop elements
+                if (main === 'Rain' || main === 'Drizzle') {
+                    const rainContainer = legendDiv.querySelector('.rain');
+                    if (rainContainer) {
+                        for (let i = 0; i < 50; i++) {
+                            const drop = document.createElement('div');
+                            drop.className = 'raindrop';
+                            drop.style.left = `${Math.random() * 100}%`;
+                            drop.style.animationDuration = `${0.5 + Math.random() * 0.5}s`;
+                            drop.style.animationDelay = `${Math.random() * 2}s`;
+                            rainContainer.appendChild(drop);
+                        }
+                    }
+                }
+            }
+
+            function fetchCurrentWeatherData(lat, lng) {
+                const weatherDataEl = document.getElementById('weatherData');
+                if (weatherDataEl) weatherDataEl.innerHTML = '<p>Fetching weather data...</p>';
+
+                return new Promise((resolve, reject) => {
+                    const apiUrl = `https://pro.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&appid=${openWeatherApiKey}&units=metric`;
+
+                    fetch(apiUrl)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`OpenWeather API error: ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.main && data.wind && data.weather && data.weather.length > 0) {
+                                const temp = data.main.temp;
+                                const humidity = data.main.humidity;
+                                const pressure = data.main.pressure;
+                                const windSpeed = data.wind.speed;
+                                const windDeg = data.wind.deg;
+
+                                let html = '<ul class="pollutant-list">'; // Re-using the style for a consistent look
+                                html += `<li><strong>Temperature:</strong> ${temp}°C</li>`;
+                                html += `<li><strong>Humidity:</strong> ${humidity}%</li>`;
+                                html += `<li><strong>Pressure:</strong> ${pressure} hPa</li>`;
+                                html += `<li><strong>Wind:</strong> ${windSpeed} m/s at ${windDeg}°</li>`;
+                                html += '</ul>';
+
+                                if (weatherDataEl) weatherDataEl.innerHTML = html;
+                                
+                                // Update the legend with the weather animation
+                                updateLegend(data.weather[0]);
+                                resolve(data);
+                            } else {
+                                throw new Error('Incomplete weather data returned.');
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Error fetching current weather data:', err);
+                            if (weatherDataEl) {
+                                weatherDataEl.innerHTML = '<p>Could not fetch weather data.</p>';
+                            }
+                            reject(err);
+                        });
+                });
+            }
+
+            function processForecastData(forecast) {
+                if (!forecast || !forecast.list) return null;
+
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                const tomorrowDateString = tomorrow.toISOString().split('T')[0];
+
+                const tomorrowsForecasts = forecast.list.filter(item => item.dt_txt.startsWith(tomorrowDateString));
+
+                if (tomorrowsForecasts.length === 0) return "No forecast data available for tomorrow.";
+
+                // Find min/max temps for tomorrow
+                let minTemp = tomorrowsForecasts[0].main.temp;
+                let maxTemp = tomorrowsForecasts[0].main.temp;
+                const weatherConditions = new Set();
+
+                for (const f of tomorrowsForecasts) {
+                    if (f.main.temp < minTemp) minTemp = f.main.temp;
+                    if (f.main.temp > maxTemp) maxTemp = f.main.temp;
+                    weatherConditions.add(f.weather[0].main);
+                }
+
+                let summary = `Tomorrow's forecast includes a high of ${maxTemp.toFixed(1)}°C and a low of ${minTemp.toFixed(1)}°C. `;
+                summary += `Conditions will include: ${[...weatherConditions].join(', ')}.`;
+
+                return summary;
+            }
+
+            function fetchForecastWeatherData(lat, lng) {
+                return new Promise((resolve, reject) => {
+                    const apiUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lng}&appid=${openWeatherApiKey}&units=metric`;
+
+                    fetch(apiUrl)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`OpenWeather Forecast API error: ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data && data.list) {
+                                resolve(data);
+                            } else {
+                                throw new Error('Incomplete forecast data returned.');
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Error fetching weather forecast data:', err);
+                            // Don't show a popup for this, as it's a background task for the AI
+                            reject(err);
+                        });
+                });
+            }
+
+            async function runInitialAiAnalysis(airData, weatherData, forecastData) {
+                const reportContainer = document.getElementById('aiReport');
+                const reportContent = document.getElementById('aiReportContent');
+                if (!reportContainer || !reportContent) return;
+
+                reportContent.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Sending data for AI analysis...</p>';
+                reportContainer.style.display = 'block'; // Ensure it's visible
+
+                if (!airData || !weatherData) {
+                    reportContent.innerHTML = `<p class="report-finding error"><i class="fas fa-exclamation-triangle"></i> Could not fetch all required data for analysis. Please try again.</p>`;
+                    return;
+                }
+
+                // Prepare the initial prompt for the AI
+                let analysisPrompt = `
+                    You are an environmental data analyst for the location: ${currentLocation.name}.
+                    Your task is to analyze the provided data and answer user questions.
+                    
+                    First, provide a brief, easy-to-understand summary (2-3 sentences) of the current conditions for a general audience. Explain what the AQI means and mention any notable pollutants or weather conditions.
+
+                    Here is the available data:
+                    Air Quality Data:
+                    - Air Quality Index (AQI): ${airData.main.aqi} (where 1=Good, 2=Fair, 3=Moderate, 4=Poor, 5=Very Poor)
+                    - PM2.5: ${airData.components.pm2_5} μg/m³
+                    - PM10: ${airData.components.pm10} μg/m³
+                    - Ozone (O₃): ${airData.components.o3} μg/m³
+                    - Nitrogen Dioxide (NO₂): ${airData.components.no2} μg/m³
+                `;
+                
+                // Add weather data to the prompt
+                analysisPrompt += `
+                    Current Weather Data:
+                    - Temperature: ${weatherData.main.temp}°C
+                    - Condition: ${weatherData.weather[0].main} (${weatherData.weather[0].description})
+                    - Humidity: ${weatherData.main.humidity}%
+                    - Pressure: ${weatherData.main.pressure} hPa
+                    - Wind: ${weatherData.wind.speed} m/s at ${weatherData.wind.deg}°
+                `;
+
+                // Add forecast data to the prompt if available
+                const forecastSummary = processForecastData(forecastData);
+                if (forecastSummary) {
+                    analysisPrompt += `\nWeather Forecast for Tomorrow: ${forecastSummary}`;
+                }
+
+                // Add user and model parts to history for the initial analysis
+                chatHistory.push({ role: 'user', parts: [{ text: analysisPrompt }] });
+
+                try {
+                    if (geminiApiKey === 'YOUR_GEMINI_API_KEY_HERE') {
+                        throw new Error("Gemini API key is not set. Please add it to the script.");
+                    }
+
+                    const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`;
+
+                    const geminiResponse = await fetch(geminiApiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contents: chatHistory })
+                    });
+
+                    if (!geminiResponse.ok) {
+                        const errorData = await geminiResponse.json();
+                        throw new Error(`Gemini API Error: ${errorData.error.message}`);
+                    }
+
+                    const resultData = await geminiResponse.json();
+                    const summary = resultData.candidates[0].content.parts[0].text;
+                    const result = { summary: summary };
+
+                    reportContent.innerHTML = `<p>${result.summary}</p>`;
+                    chatInput.disabled = false;
+
+                    // Add the AI's first response to the history
+                    chatHistory.push({ role: 'model', parts: [{ text: result.summary }] });
+
+                    // Add a welcome message to the chat UI
+                    let locationDisplayName = currentLocation.name.startsWith('Current Location')
+                        ? 'Current Location'
+                        : currentLocation.name.split(',')[0];
+                    chatMessages.innerHTML = ''; // Clear initial message
+                    appendMessageToChat('assistant', `**Analysis for ${locationDisplayName} is complete.** You can now ask follow-up questions about the air quality or weather.`);
+
+                } catch (error) {
+                    console.error('Failed to get AI analysis from backend:', error);
+                    reportContent.innerHTML = `<p class="report-finding error"><i class="fas fa-exclamation-triangle"></i> AI analysis failed. ${error.message}</p>`;
+                    appendMessageToChat('assistant', `AI analysis is unavailable. Error: ${error.message}`);
+                    chatInput.disabled = true;
+                } finally {
+                    // Add suggested questions regardless of success or failure (if chat is enabled)
+                    if (!chatInput.disabled) {
+                        const suggestionsContainer = document.createElement('div');
+                        suggestionsContainer.className = 'suggested-questions';
+                        const questions = generateSuggestedQuestions(airData, weatherData, forecastData);
+
+                        questions.forEach(q => {
+                            const qEl = document.createElement('div');
+                            qEl.className = 'suggested-question';
+                            qEl.textContent = q;
+                            qEl.onclick = () => {
+                                chatInput.value = q;
+                                handleChatSubmit();
+                            };
+                            suggestionsContainer.appendChild(qEl);
+                        });
+
+                        const chatbotContainer = document.getElementById('chatbot');
+                        // Remove old suggestions if any
+                        chatbotContainer.querySelector('.suggested-questions')?.remove();
+                        chatbotContainer.appendChild(suggestionsContainer);
+                    }
+                }
+            }
+
+            function generateSuggestedQuestions(airData, weatherData, forecastData) {
+                const questions = new Set();
+
+                // Add a forecast question if data is available
+                if (forecastData) {
+                    questions.add("What will the weather be like tomorrow?");
+                }
+
+                // Add questions based on Air Quality
+                if (airData) {
+                    if (airData.main.aqi > 3) {
+                        questions.add("Why is the air quality poor today?");
+                    } else {
+                        questions.add("Is the air quality safe for outdoor activities?");
+                    }
+
+                    if (airData.components.pm2_5 > 35) { // WHO guideline is lower, but this is for "high"
+                        questions.add("What are the health risks of the current PM2.5 level?");
+                    } else {
+                        questions.add("Explain the PM2.5 level in simple terms.");
+                    }
+                }
+
+                // Add a generic question if we still don't have enough
+                if (questions.size < 3) {
+                    questions.add("What is the main pollutant of concern right now?");
+                }
+
+                // Return the first 3 unique questions
+                return Array.from(questions).slice(0, 3);
+            }
+
+            function appendMessageToChat(sender, text) {
+                const messageEl = document.createElement('div');
+                messageEl.classList.add('chat-message', `${sender}-message`);
+                // Basic markdown for bolding
+                text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                
+                messageEl.innerHTML = text;
+                chatMessages.appendChild(messageEl);
+                chatMessages.scrollTop = chatMessages.scrollHeight; // Auto-scroll to bottom
+            }
+
+            async function handleChatSubmit() {
+                const userText = chatInput.value.trim();
+                if (!userText) return;
+
+                appendMessageToChat('user', userText);
+                chatInput.value = '';
+
+                // Add user message to history
+                chatHistory.push({ role: 'user', parts: [{ text: userText }] });
+
+                // Show loading indicator
+                const loadingEl = document.createElement('div');
+                loadingEl.classList.add('chat-message', 'assistant-message', 'loading');
+                loadingEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                chatMessages.appendChild(loadingEl);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                try {
+                    if (geminiApiKey === 'YOUR_GEMINI_API_KEY_HERE') {
+                        throw new Error("Gemini API key is not set.");
+                    }
+
+                    const geminiApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`;
+
+                    const geminiResponse = await fetch(geminiApiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contents: chatHistory })
+                    });
+
+                    if (!geminiResponse.ok) {
+                        const errorData = await geminiResponse.json();
+                        throw new Error(`Gemini API Error: ${errorData.error.message}`);
+                    }
+
+                    const resultData = await geminiResponse.json();
+                    const summary = resultData.candidates[0].content.parts[0].text;
+                    const result = { summary: summary };
+                    
+                    // Remove loading indicator and show response
+                    chatMessages.removeChild(loadingEl);
+                    appendMessageToChat('assistant', result.summary);
+
+                    // Add AI response to history
+                    chatHistory.push({ role: 'model', parts: [{ text: summary }] });
+
+                } catch (error) {
+                    chatMessages.removeChild(loadingEl);
+                    appendMessageToChat('assistant', 'Sorry, I could not connect to the AI service. Please ensure the backend server is running.');
+                    console.error('Failed to get chat response from backend:', error);
+                }
+            }
+
+            function geocodeLocation(locationName) {
+                const apiUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationName)}&limit=1&addressdetails=1`;
+                fetch(apiUrl)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.length > 0) {
+                            const lat = parseFloat(data[0].lat);
+                            const lng = parseFloat(data[0].lon);
+                            currentLocation = { name: data[0].display_name, lat, lng };
+                            updateFromSelections(true);
+                        } else {
+                            alert('Location not found. Please try again.');
+                        }
+                    })
+                    .catch(err => {
+                        alert('Error geocoding location: ' + err.message);
+                    });
+            }
+
+            function fetchLocationSuggestions(query) {
+                if (query.length < 2) {
+                    hideSuggestions();
+                    return;
+                }
+
+                const apiUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`;
+                fetch(apiUrl)
+                    .then(response => response.json())
+                    .then(data => {
+                        displaySuggestions(data);
+                    })
+                    .catch(err => {
+                        console.error('Error fetching suggestions:', err);
+                        hideSuggestions();
+                    });
+            }
+
+            function displaySuggestions(suggestions) {
+                if (suggestions.length === 0) {
+                    hideSuggestions();
+                    return;
+                }
+
+                locationSuggestions.innerHTML = '';
+
+                suggestions.forEach((suggestion, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'suggestion-item';
+                    div.innerHTML = `
+                        <div class="suggestion-name">${suggestion.display_name}</div>
+                        <div class="suggestion-type">${suggestion.type || 'location'}</div>
+                    `;
+
+                    div.addEventListener('click', () => {
+                        selectSuggestion(suggestion);
+                    });
+
+                    locationSuggestions.appendChild(div);
+                });
+
+                locationSuggestions.style.display = 'block';
+            }
+
+            function hideSuggestions() {
+                locationSuggestions.style.display = 'none';
+                locationSuggestions.innerHTML = '';
+            }
+
+            function selectSuggestion(suggestion) {
+                if (manualLocationInput) {
+                    manualLocationInput.value = suggestion.display_name;
+                    // Trigger input event to ensure the change is recognized
+                    manualLocationInput.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+                hideSuggestions();
+                geocodeLocation(suggestion.display_name);
+            }
+
+            let suggestionTimeout;
+            if (manualLocationInput) {
+                manualLocationInput.addEventListener('input', (e) => {
+                    clearTimeout(suggestionTimeout);
+                    suggestionTimeout = setTimeout(() => {
+                        fetchLocationSuggestions(e.target.value.trim());
+                    }, 300);
+                });
+
+                manualLocationInput.addEventListener('focus', () => {
+                    if (manualLocationInput.value.trim().length >= 2) {
+                        fetchLocationSuggestions(manualLocationInput.value.trim());
+                    }
+                });
+
+                manualLocationInput.addEventListener('blur', () => {
+                    // Delay hiding suggestions to allow for clicks
+                    setTimeout(hideSuggestions, 200);
+                });
+
+                // Handle keyboard navigation
+                manualLocationInput.addEventListener('keydown', (e) => {
+                    const suggestions = locationSuggestions.querySelectorAll('.suggestion-item');
+                    if (suggestions.length === 0) return;
+
+                    let currentIndex = -1;
+                    suggestions.forEach((item, index) => {
+                        if (item.classList.contains('highlighted')) {
+                            currentIndex = index;
+                        }
+                    });
+
+                    switch (e.key) {
+                        case 'ArrowDown':
+                            e.preventDefault();
+                            if (currentIndex < suggestions.length - 1) {
+                                if (currentIndex >= 0) {
+                                    suggestions[currentIndex].classList.remove('highlighted');
+                                }
+                                currentIndex++;
+                                suggestions[currentIndex].classList.add('highlighted');
+                            }
+                            break;
+                        case 'ArrowUp':
+                            e.preventDefault();
+                            if (currentIndex > 0) {
+                                suggestions[currentIndex].classList.remove('highlighted');
+                                currentIndex--;
+                                suggestions[currentIndex].classList.add('highlighted');
+                            }
+                            break;
+                        case 'Enter':
+                            e.preventDefault();
+                            if (currentIndex >= 0) {
+                                selectSuggestion({
+                                    display_name: suggestions[currentIndex].querySelector('.suggestion-name').textContent
+                                });
+                            }
+                            break;
+                        case 'Escape':
+                            hideSuggestions();
+                            break;
+                    }
+                });
+            }
+
+            currentLocationBtn.addEventListener('click', getCurrentLocation);
+            if (manualLocationInput) {
+                manualLocationBtn.addEventListener('click', () => {
+                    const locationName = manualLocationInput.value.trim();
+                    if (locationName) {
+                        geocodeLocation(locationName);
+                    } else {
+                        alert('Please enter a location.');
+                    }
+                });
+            }
+
+            chatSendBtn.addEventListener('click', handleChatSubmit);
+            chatInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleChatSubmit();
+                }
+            });
+
+            // Initial load
+        })();
+    });
+</script>
+</body>
+</html>

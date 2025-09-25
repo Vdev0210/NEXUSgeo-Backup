@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NASA Hackathon - Solution</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Login Check -->
+    <div id="loginCheck" class="login-check" style="display: none;">
+        <div class="login-overlay">
+            <div class="login-prompt">
+                <h2>Access Restricted</h2>
+                <p>Please log in to access this NASA Hackathon platform.</p>
+                <button onclick="window.location.href='login.html'" class="login-btn">Login</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <a href="home.html" class="logo" aria-label="Home">
+                <i class="fas fa-rocket"></i>
+                <span>NEXUS <span class="logo-geo">geo</span></span>
+            </a>
+            <nav class="nav">
+                <div class="nav-toggle">
+                    <i class="fas fa-bars"></i>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="home.html" class="nav-link">HOME</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="problem.html" class="nav-link">PROBLEM STATEMENT</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="solution.html" class="nav-link active">SOLUTION</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="features.html" class="nav-link">FEATURES</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="impact.html" class="nav-link">IMPACT</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="data-sources.html" class="nav-link">DATA SOURCES</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="demo.html" class="nav-link">DEMO</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="team.html" class="nav-link">TEAM</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="contact.html" class="nav-link">CONTACT</a></li>
+                </ul>
+                <div class="user-controls">
+                    <button id="logoutBtn" class="logout-btn" style="display: none;">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <section class="solution-section">
+                <h2>Our Solution</h2>
+                <div class="solution-content">
+                    <div class="solution-diagram">
+                        <div class="solution-step">
+                            <div class="step-number">1</div>
+                            <h3>Data Collection</h3>
+                            <p>NASA Earth observations + urban sensors + ground stations</p>
+                        </div>
+                        <div class="solution-step">
+                            <div class="step-number">2</div>
+                            <h3>AI Processing</h3>
+                            <p>Machine learning models for urban climate analysis</p>
+                        </div>
+                        <div class="solution-step">
+                            <div class="step-number">3</div>
+                            <h3>Planning Intelligence</h3>
+                            <p>Actionable insights for city planners and communities</p>
+                        </div>
+                        <div class="solution-step">
+                            <div class="step-number">4</div>
+                            <h3>Real-time Alerts</h3>
+                            <p>Health and environmental notifications to citizens</p>
+                        </div>
+                    </div>
+
+                    <!-- System Architecture SVG -->
+                    <div class="architecture-diagram">
+                        <h3>System Architecture</h3>
+                        <svg width="100%" height="auto" viewBox="0 0 1000 420" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Background -->
+                            <rect width="1000" height="420" fill="#0a0a0f" stroke="#00d4ff" stroke-width="2"/>
+
+                            <!-- Data Sources -->
+                            <g id="data-sources">
+                                <rect x="50" y="50" width="120" height="80" fill="#1a1a2e" stroke="#00ff88" stroke-width="2" rx="5"/>
+                                <text x="110" y="85" text-anchor="middle" dominant-baseline="middle" fill="#00ff88" font-family="Space Grotesk" font-size="12">NASA</text>
+                                <text x="110" y="100" text-anchor="middle" dominant-baseline="middle" fill="#00ff88" font-family="Space Grotesk" font-size="12">Earth Data</text>
+                                <rect x="50" y="150" width="120" height="80" fill="#1a1a2e" stroke="#00ff88" stroke-width="2" rx="5"/>
+                                <text x="110" y="185" text-anchor="middle" dominant-baseline="middle" fill="#00ff88" font-family="Space Grotesk" font-size="12">Urban</text>
+                                <text x="110" y="200" text-anchor="middle" dominant-baseline="middle" fill="#00ff88" font-family="Space Grotesk" font-size="12">Sensors</text>
+                                <rect x="50" y="250" width="120" height="80" fill="#1a1a2e" stroke="#00ff88" stroke-width="2" rx="5"/>
+                                <text x="110" y="285" text-anchor="middle" dominant-baseline="middle" fill="#00ff88" font-family="Space Grotesk" font-size="12">Ground</text>
+                                <text x="110" y="300" text-anchor="middle" dominant-baseline="middle" fill="#00ff88" font-family="Space Grotesk" font-size="12">Stations</text>
+                            </g>
+
+                            <!-- Processing Engine -->
+                            <g id="processing">
+                                <rect x="220" y="150" width="140" height="100" fill="#1a1a2e" stroke="#ff6b35" stroke-width="2" rx="5"/>
+                                <text x="290" y="180" text-anchor="middle" dominant-baseline="middle" fill="#ff6b35" font-family="Space Grotesk" font-size="14" font-weight="bold">AI Processing</text>
+                                <text x="290" y="200" text-anchor="middle" dominant-baseline="middle" fill="#ff6b35" font-family="Space Grotesk" font-size="12">Engine</text>
+                                <text x="290" y="220" text-anchor="middle" dominant-baseline="middle" fill="#ff6b35" font-family="Space Grotesk" font-size="10">Machine Learning</text>
+                                <text x="290" y="235" text-anchor="middle" dominant-baseline="middle" fill="#ff6b35" font-family="Space Grotesk" font-size="10">Climate Models</text>
+                            </g>
+
+                            <!-- Database -->
+                            <g id="database">
+                                <rect x="410" y="150" width="120" height="100" fill="#1a1a2e" stroke="#00d4ff" stroke-width="2" rx="5"/>
+                                <text x="470" y="180" text-anchor="middle" dominant-baseline="middle" fill="#00d4ff" font-family="Space Grotesk" font-size="14" font-weight="bold">Database</text>
+                                <text x="470" y="200" text-anchor="middle" dominant-baseline="middle" fill="#00d4ff" font-family="Space Grotesk" font-size="12">PostgreSQL</text>
+                                <text x="470" y="220" text-anchor="middle" dominant-baseline="middle" fill="#00d4ff" font-family="Space Grotesk" font-size="10">Time Series</text>
+                                <text x="470" y="235" text-anchor="middle" dominant-baseline="middle" fill="#00d4ff" font-family="Space Grotesk" font-size="10">Analytics</text>
+                            </g>
+
+                            <!-- Applications -->
+                            <g id="applications">
+                                <rect x="580" y="100" width="120" height="80" fill="#1a1a2e" stroke="#ff6b35" stroke-width="2" rx="5"/>
+                                <text x="640" y="135" text-anchor="middle" dominant-baseline="middle" fill="#ff6b35" font-family="Space Grotesk" font-size="12">Planning</text>
+                                <text x="640" y="150" text-anchor="middle" dominant-baseline="middle" fill="#ff6b35" font-family="Space Grotesk" font-size="12">Dashboard</text>
+                                <rect x="580" y="200" width="120" height="80" fill="#1a1a2e" stroke="#00ff88" stroke-width="2" rx="5"/>
+                                <text x="640" y="235" text-anchor="middle" dominant-baseline="middle" fill="#00ff88" font-family="Space Grotesk" font-size="12">Public</text>
+                                <text x="640" y="250" text-anchor="middle" dominant-baseline="middle" fill="#00ff88" font-family="Space Grotesk" font-size="12">Health Alerts</text>
+                            </g>
+
+                            <!-- Users -->
+                            <g id="users">
+                                <rect x="750" y="100" width="120" height="80" fill="#1a1a2e" stroke="#00d4ff" stroke-width="2" rx="5"/>
+                                <text x="810" y="135" text-anchor="middle" dominant-baseline="middle" fill="#00d4ff" font-family="Space Grotesk" font-size="12">City</text>
+                                <text x="810" y="150" text-anchor="middle" dominant-baseline="middle" fill="#00d4ff" font-family="Space Grotesk" font-size="12">Planners</text>
+                                <rect x="750" y="200" width="120" height="80" fill="#1a1a2e" stroke="#00d4ff" stroke-width="2" rx="5"/>
+                                <text x="810" y="235" text-anchor="middle" dominant-baseline="middle" fill="#00d4ff" font-family="Space Grotesk" font-size="12">Citizens</text>
+                                <text x="810" y="250" text-anchor="middle" dominant-baseline="middle" fill="#00d4ff" font-family="Space Grotesk" font-size="12">& Communities</text>
+                            </g>
+
+                            <!-- Data Flow Arrows -->
+                            <defs>
+                                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                    <polygon points="0 0, 10 3.5, 0 7" fill="#00ff88"/>
+                                </marker>
+                            </defs>
+
+                            <!-- Data flow lines -->
+                            <path d="M 170 90 L 220 175" stroke="#00ff88" stroke-width="2" marker-end="url(#arrowhead)"/>
+                            <path d="M 170 190 L 220 200" stroke="#00ff88" stroke-width="2" marker-end="url(#arrowhead)"/>
+                            <path d="M 170 290 L 220 225" stroke="#00ff88" stroke-width="2" marker-end="url(#arrowhead)"/>
+                            <path d="M 360 175 L 410 175" stroke="#ff6b35" stroke-width="2" marker-end="url(#arrowhead)"/>
+                            <path d="M 360 200 L 410 200" stroke="#ff6b35" stroke-width="2" marker-end="url(#arrowhead)"/>
+                            <path d="M 360 225 L 410 225" stroke="#ff6b35" stroke-width="2" marker-end="url(#arrowhead)"/>
+                            <path d="M 530 175 L 580 125" stroke="#00d4ff" stroke-width="2" marker-end="url(#arrowhead)"/>
+                            <path d="M 530 200 L 580 225" stroke="#00d4ff" stroke-width="2" marker-end="url(#arrowhead)"/>
+                            <path d="M 530 225 L 580 250" stroke="#00d4ff" stroke-width="2" marker-end="url(#arrowhead)"/>
+                            <path d="M 700 125 L 750 125" stroke="#ff6b35" stroke-width="2" marker-end="url(#arrowhead)"/>
+                            <path d="M 700 225 L 750 225" stroke="#00ff88" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        </svg>
+                    </div>
+
+                    <div class="solution-tech">
+                        <h3>Technologies Used</h3>
+                        <div class="tech-stack">
+                            <span class="tech-item">Python</span>
+                            <span class="tech-item">TensorFlow</span>
+                            <span class="tech-item">React</span>
+                            <span class="tech-item">Node.js</span>
+                            <span class="tech-item">PostgreSQL</span>
+                            <span class="tech-item">Docker</span>
+                            <span class="tech-item">Kubernetes</span>
+                            <span class="tech-item">AWS</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <h4>NASA Hackathon Project</h4>
+                    <p>Empowering the future of Earth observation through innovative technology</p>
+                </div>
+                <div class="footer-links">
+                    <a href="home.html">Home</a>
+                    <a href="contact.html">Contact</a>
+                    <a href="data-sources.html">Data Sources</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 NASA Hackathon Team. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

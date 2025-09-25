@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NASA Hackathon - Team</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Login Check -->
+    <div id="loginCheck" class="login-check" style="display: none;">
+        <div class="login-overlay">
+            <div class="login-prompt">
+                <h2>Access Restricted</h2>
+                <p>Please log in to access this NASA Hackathon platform.</p>
+                <button onclick="window.location.href='login.html'" class="login-btn">Login</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <a href="home.html" class="logo" aria-label="Home">
+                <i class="fas fa-rocket"></i>
+                <span>NEXUS <span class="logo-geo">geo</span></span>
+            </a>
+            <nav class="nav">
+                <div class="nav-toggle">
+                    <i class="fas fa-bars"></i>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="home.html" class="nav-link">HOME</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="problem.html" class="nav-link">PROBLEM STATEMENT</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="solution.html" class="nav-link">SOLUTION</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="features.html" class="nav-link">FEATURES</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="impact.html" class="nav-link">IMPACT</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="data-sources.html" class="nav-link">DATA SOURCES</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="demo.html" class="nav-link">DEMO</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="team.html" class="nav-link active">TEAM</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="contact.html" class="nav-link">CONTACT</a></li>
+                </ul>
+                <div class="user-controls">
+                    <button id="logoutBtn" class="logout-btn" style="display: none;">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <section class="team-section">
+                <h2>Our Team</h2>
+                <div class="team-content">
+                    <div class="team-intro">
+                        <h3>Meet the Innovators</h3>
+                        <p>A diverse team of data specialist, data analyst, frontend developer, backend developer and UX/UI designer united by a passion for leveraging NASA technology to create sustainable cities.</p>
+                    </div>
+
+                    <div class="team-grid">
+                        <div class="team-member">
+                            <div class="member-avatar">
+                                <i class="fas fa-user-astronaut"></i>
+                            </div>
+                            <h3>Supreeth</h3>
+                            <div class="member-role">Data Specialist</div>
+                            <div class="member-bio">
+                                <p></p>
+                            </div>
+                        </div>
+
+                        <div class="team-member">
+                            <div class="member-avatar">
+                                <i class="fas fa-user-astronaut"></i>
+                            </div>
+                            <h3>Nischal</h3>
+                            <div class="member-role">Data Analyst</div>
+                            <div class="member-bio">
+                                <p></p>
+                            </div>
+                        </div>
+
+                        <div class="team-member">
+                            <div class="member-avatar">
+                                <i class="fas fa-user-astronaut"></i>
+                            </div>
+                            <h3>Viaan Singh</h3>
+                            <div class="member-role">Frontend Developer</div>
+                            <div class="member-bio">
+                                <p></p>
+                            </div>
+                        </div>
+
+                        <div class="team-member">
+                            <div class="member-avatar">
+                                <i class="fas fa-user-astronaut"></i>
+                            </div>
+                            <h3>Meghana</h3>
+                            <div class="member-role">Backend Developer</div>
+                            <div class="member-bio">
+                                <p></p>
+                            </div>
+                        </div>
+
+                        <div class="team-member">
+                            <div class="member-avatar">
+                                <i class="fas fa-user-astronaut"></i>
+                            </div>
+                            <h3>Sarayu</h3>
+                            <div class="member-role">UX/UI Designer</div>
+                            <div class="member-bio">
+                                <p></p>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="team-values">
+                        <h3>Our Values</h3>
+                        <div class="features-grid">
+                            <div class="feature-card">
+                                <i class="fas fa-globe-americas"></i>
+                                <h4>Environmental Stewardship</h4>
+                                <p>Committed to protecting our planet through innovative technology and data-driven solutions</p>
+                            </div>
+                            <div class="feature-card">
+                                <i class="fas fa-users"></i>
+                                <h4>Community Focus</h4>
+                                <p>Building solutions that serve diverse communities and address environmental justice</p>
+                            </div>
+                            <div class="feature-card">
+                                <i class="fas fa-lightbulb"></i>
+                                <h4>Innovation</h4>
+                                <p>Pushing the boundaries of what's possible with NASA technology and AI</p>
+                            </div>
+                            <div class="feature-card">
+                                <i class="fas fa-balance-scale"></i>
+                                <h4>Scientific Integrity</h4>
+                                <p>Maintaining the highest standards of data accuracy and scientific methodology</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <h4>NASA Hackathon Project</h4>
+                    <p>Empowering the future of Earth observation through innovative technology</p>
+                </div>
+                <div class="footer-links">
+                    <a href="home.html">Home</a>
+                    <a href="contact.html">Contact</a>
+                    <a href="data-sources.html">Data Sources</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 NASA Hackathon Team. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
