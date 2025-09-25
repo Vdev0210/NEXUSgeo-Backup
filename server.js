@@ -44,12 +44,13 @@ app.post('/analyze', async (req, res) => {
 });
 
 
-// Start server
-// We will no longer start the server directly.
-// Instead, we'll export the app for our serverless function wrapper.
+// Export the app for serverless environments like Netlify
 module.exports = app;
 
-const port = 3000;
-app.listen(port, () => {
-  console.log(`Server with AI analysis endpoint running on http://localhost:${port}`);
-});
+// Start the server only when this file is run directly (for local development)
+if (require.main === module) {
+  const port = 3000;
+  app.listen(port, () => {
+    console.log(`Server with AI analysis endpoint running on http://localhost:${port}`);
+  });
+}
