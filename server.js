@@ -10,7 +10,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // Serve static files (HTML, CSS, JS) from the root directory
-app.use(express.static(__dirname));
+app.use(express.static('public'));
 
 // --- AI Analysis Endpoint ---
 

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NASA Hackathon - Data Sources</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Login Check -->
+    <div id="loginCheck" class="login-check" style="display: none;">
+        <div class="login-overlay">
+            <div class="login-prompt">
+                <h2>Access Restricted</h2>
+                <p>Please log in to access this NASA Hackathon platform.</p>
+                <button onclick="window.location.href='login.html'" class="login-btn">Login</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <a href="home.html" class="logo" aria-label="Home">
+                <i class="fas fa-rocket"></i>
+                <span>NEXUS <span class="logo-geo">geo</span></span>
+            </a>
+            <nav class="nav">
+                <div class="nav-toggle">
+                    <i class="fas fa-bars"></i>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="home.html" class="nav-link">HOME</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="problem.html" class="nav-link">PROBLEM STATEMENT</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="solution.html" class="nav-link">SOLUTION</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="features.html" class="nav-link">FEATURES</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="impact.html" class="nav-link">IMPACT</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="data-sources.html" class="nav-link active">DATA SOURCES</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="demo.html" class="nav-link">DEMO</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="team.html" class="nav-link">TEAM</a></li>
+                    <li><span class="nav-separator">|</span></li>
+                    <li><a href="contact.html" class="nav-link">CONTACT</a></li>
+                </ul>
+                <div class="user-controls">
+                    <button id="logoutBtn" class="logout-btn" style="display: none;">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="container">
+            <section class="data-sources-section">
+                <h2>Data Sources</h2>
+                <div class="data-sources-content">
+                    <div class="data-sources-intro">
+                        <h3>Comprehensive Environmental Intelligence</h3>
+                        <p>Our platform integrates multiple NASA Earth observation datasets with ground-based sensors to provide comprehensive environmental monitoring and forecasting capabilities.</p>
+                    </div>
+
+                    <div class="data-grid">
+                        <div class="data-source">
+                            <i class="fas fa-satellite"></i>
+                            <h3>NASA TEMPO</h3>
+                            <p>Tropospheric Emissions: Monitoring of Pollution</p>
+                            <div class="data-details">
+                                <span><strong>Resolution:</strong> 2.1 km x 4.5 km</span>
+                                <span><strong>Coverage:</strong> North America</span>
+                                <span><strong>Frequency:</strong> Hourly measurements</span>
+                                <span><strong>Pollutants:</strong> NO2, O3, SO2, HCHO</span>
+                            </div>
+                        </div>
+
+                        <div class="data-source">
+                            <i class="fas fa-eye"></i>
+                            <h3>NASA MODIS</h3>
+                            <p>Moderate Resolution Imaging Spectroradiometer</p>
+                            <div class="data-details">
+                                <span><strong>Resolution:</strong> 250m - 1km</span>
+                                <span><strong>Coverage:</strong> Global</span>
+                                <span><strong>Frequency:</strong> Daily</span>
+                                <span><strong>Data:</strong> Land surface temperature, vegetation</span>
+                            </div>
+                        </div>
+
+                        <div class="data-source">
+                            <i class="fas fa-cloud"></i>
+                            <h3>NASA VIIRS</h3>
+                            <p>Visible Infrared Imaging Radiometer Suite</p>
+                            <div class="data-details">
+                                <span><strong>Resolution:</strong> 375m - 750m</span>
+                                <span><strong>Coverage:</strong> Global</span>
+                                <span><strong>Frequency:</strong> Daily</span>
+                                <span><strong>Data:</strong> Night lights, fires, clouds</span>
+                            </div>
+                        </div>
+
+                        <div class="data-source">
+                            <i class="fas fa-thermometer-half"></i>
+                            <h3>Ground Sensors</h3>
+                            <p>Urban Environmental Monitoring Network</p>
+                            <div class="data-details">
+                                <span><strong>Sensors:</strong> 10,000+ deployed</span>
+                                <span><strong>Coverage:</strong> Major cities worldwide</span>
+                                <span><strong>Frequency:</strong> Real-time</span>
+                                <span><strong>Data:</strong> PM2.5, PM10, CO, temperature</span>
+                            </div>
+                        </div>
+
+                        <div class="data-source">
+                            <i class="fas fa-wind"></i>
+                            <h3>Weather Stations</h3>
+                            <p>Meteorological Data Integration</p>
+                            <div class="data-details">
+                                <span><strong>Stations:</strong> 15,000+ global</span>
+                                <span><strong>Coverage:</strong> Worldwide</span>
+                                <span><strong>Frequency:</strong> Hourly updates</span>
+                                <span><strong>Data:</strong> Wind, humidity, pressure</span>
+                            </div>
+                        </div>
+
+                        <div class="data-source">
+                            <i class="fas fa-mobile-alt"></i>
+                            <h3>Citizen Science</h3>
+                            <p>Crowdsourced Environmental Data</p>
+                            <div class="data-details">
+                                <span><strong>Contributors:</strong> 100,000+</span>
+                                <span><strong>Coverage:</strong> Urban areas</span>
+                                <span><strong>Frequency:</strong> Continuous</span>
+                                <span><strong>Data:</strong> Local observations, photos</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="data-integration">
+                        <h3>Data Integration Pipeline</h3>
+                        <div class="solution-diagram">
+                            <div class="solution-step">
+                                <div class="step-number">1</div>
+                                <h4>Data Collection</h4>
+                                <p>Real-time ingestion from NASA APIs and sensor networks</p>
+                            </div>
+                            <div class="solution-step">
+                                <div class="step-number">2</div>
+                                <h4>Quality Control</h4>
+                                <p>Automated validation and calibration of incoming data</p>
+                            </div>
+                            <div class="solution-step">
+                                <div class="step-number">3</div>
+                                <h4>Fusion & Analysis</h4>
+                                <p>AI-powered integration and predictive modeling</p>
+                            </div>
+                            <div class="solution-step">
+                                <div class="step-number">4</div>
+                                <h4>Distribution</h4>
+                                <p>Real-time delivery to applications and users</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <h4>NASA Hackathon Project</h4>
+                    <p>Empowering the future of Earth observation through innovative technology</p>
+                </div>
+                <div class="footer-links">
+                    <a href="home.html">Home</a>
+                    <a href="contact.html">Contact</a>
+                    <a href="data-sources.html">Data Sources</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 NASA Hackathon Team. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
