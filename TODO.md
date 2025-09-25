@@ -1,13 +1,3 @@
-# TODO: Enhance AI Chat Bot Styling
-
-## Tasks
-- [ ] Update chatbot CSS in styles.css to make it look like a modern dialogue box
-- [ ] Add speech bubble tails and better visual effects
-- [ ] Ensure styling matches website's dark space theme
-- [ ] Test responsiveness and visual integration
-- [ ] Launch browser to verify changes
-
-## Completed
-- [x] Analyze current chatbot implementation
-- [x] Plan styling enhancements
-- [x] Get user approval
+- [x] Add OpenAI import and initialization in server.js
+- [x] Modify /analyze endpoint to add fallback to OpenAI on Gemini 429 error
+- [ ] Test the server locally

@@ -418,13 +418,11 @@
                 // Update info panel
                 const currentLocationEl = document.getElementById('currentLocation');
                 const coordinatesEl = document.getElementById('coordinates');
-                const currentDataTypeEl = document.getElementById('currentDataType');
                 const lastUpdateEl = document.getElementById('lastUpdate');
                 const dataStatusEl = document.getElementById('dataStatus');
 
                 if (currentLocationEl) currentLocationEl.textContent = loc.name;
                 if (coordinatesEl) coordinatesEl.textContent = `${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)}`;
-                if (currentDataTypeEl) currentDataTypeEl.textContent = 'Air Quality'; // Hardcoded value
                 if (dataStatusEl) dataStatusEl.textContent = 'Ready';
 
                 if (addMarker) {

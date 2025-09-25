@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const OpenAI = require('openai');
 const axios = require('axios');
 require('dotenv').config();
 
@@ -17,12 +18,14 @@ app.use(express.static('public'));
 // Initialize Google Generative AI
 // Make sure your GOOGLE_API_KEY is set in your .env file
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const OPENWEATHER_API_KEY = process.env.OPENWEATHER_API_KEY;
 
 // --- Diagnostic Logging ---
 // This will help verify if the API keys are loaded correctly.
 // It shows 'undefined' if the key is missing or just the first few characters if it's present.
 console.log(`Google API Key loaded: ${process.env.GOOGLE_API_KEY ? 'Yes, starts with ' + process.env.GOOGLE_API_KEY.substring(0, 4) : 'No (undefined)'}`);
+console.log(`OpenAI API Key loaded: ${process.env.OPENAI_API_KEY ? 'Yes, starts with ' + process.env.OPENAI_API_KEY.substring(0, 4) : 'No (undefined)'}`);
 console.log(`OpenWeather API Key loaded: ${OPENWEATHER_API_KEY ? 'Yes, starts with ' + OPENWEATHER_API_KEY.substring(0, 4) : 'No (undefined)'}`);
 // --------------------------
 
@@ -41,6 +44,7 @@ app.post('/analyze', async (req, res) => {
   }
 
   try {
+    console.log('Attempting AI analysis with Gemini...');
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
 
     // The history from the client already includes the latest user message.
@@ -59,10 +63,38 @@ app.post('/analyze', async (req, res) => {
     const response = await result.response;
     const text = response.text();
 
+    console.log('Gemini analysis successful.');
     res.json({ summary: text });
   } catch (error) {
-    console.error('Error with Generative AI:', error);
-    res.status(500).json({ error: `Failed to generate AI analysis. Details: ${error.message}` });
+    console.error('Error with Gemini:', error.message);
+    if (error.status === 429 || error.message.includes('429') || error.message.includes('Too Many Requests')) {
+      console.log('Gemini quota exceeded, falling back to OpenAI...');
+      if (!process.env.OPENAI_API_KEY) {
+        console.error('OpenAI API Key is missing. Cannot fallback.');
+        return res.status(500).json({ error: 'AI analysis unavailable: Gemini quota exceeded and OpenAI key not configured.' });
+      }
+      try {
+        // Format history for OpenAI
+        const messages = history.map(msg => ({
+          role: msg.role,
+          content: msg.parts[0].text
+        }));
+
+        const completion = await openai.chat.completions.create({
+          model: 'gpt-4o-mini',
+          messages: messages,
+        });
+
+        const text = completion.choices[0].message.content;
+        console.log('OpenAI analysis successful.');
+        res.json({ summary: text });
+      } catch (openaiError) {
+        console.error('Error with OpenAI fallback:', openaiError.message);
+        res.status(500).json({ error: `Failed to generate AI analysis with both Gemini and OpenAI. Details: ${openaiError.message}` });
+      }
+    } else {
+      res.status(500).json({ error: `Failed to generate AI analysis. Details: ${error.message}` });
+    }
   }
 });
 
