@@ -50,8 +50,8 @@ The platform features a carefully crafted dark space theme including:
 ## 🔐 Authentication
 
 ### Demo Credentials
-- **Username**: `nasa-demo`
-- **Password**: `hackathon2024`
+- **Username**: `nasa`
+- **Password**: `nasa`
 
 The authentication system includes:
 - Secure login form with password visibility toggle
@@ -219,3 +219,4 @@ For questions or support:
 **Built with ❤️ for NASA Hackathon 2024**
 
 *Empowering the future of Earth observation through innovative technology and data-driven insights.*
+
