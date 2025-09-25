@@ -395,9 +395,7 @@
                 let currentLocation = { name: 'Los Angeles, CA', lat: 34.0522, lng: -118.2437 };
                 let chatHistory = [];
 
-                // --- IMPORTANT: Replace with your actual Gemini API Key ---
                 // The Gemini API key is now used on the server.
-                const openWeatherApiKey = '7ee55f6de783c663f99f166dc7396cf5';
 
             // Create a slightly larger icon for the main location
             const mainLocationIcon = L.icon({
@@ -486,12 +484,13 @@
                 if (lastUpdateEl) lastUpdateEl.textContent = '...';
 
                 return new Promise((resolve, reject) => {
-                    const apiUrl = `https://pro.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lng}&appid=${openWeatherApiKey}`;
+                    // Calls our new backend endpoint
+                    const apiUrl = `/weather/air-quality?lat=${lat}&lon=${lng}`;
 
                     fetch(apiUrl)
                         .then(response => {
                             if (!response.ok) {
-                                throw new Error(`OpenWeather API error: ${response.status}`);
+                                return response.json().then(err => { throw new Error(err.error || `Server error: ${response.status}`) });
                             }
                             return response.json();
                         })
@@ -534,7 +533,7 @@
 
                             L.popup()
                               .setLatLng([lat, lng])
-                              .setContent(`Could not fetch Air Quality data from OpenWeather.<br>Error: ${err.message}`)
+                              .setContent(`Could not fetch Air Quality data.<br>Error: ${err.message}`)
                               .openOn(map);
                             reject(err);
                         });
@@ -618,12 +617,13 @@
                 if (weatherDataEl) weatherDataEl.innerHTML = '<p>Fetching weather data...</p>';
 
                 return new Promise((resolve, reject) => {
-                    const apiUrl = `https://pro.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&appid=${openWeatherApiKey}&units=metric`;
+                    // Calls our new backend endpoint
+                    const apiUrl = `/weather/current?lat=${lat}&lon=${lng}`;
 
                     fetch(apiUrl)
                         .then(response => {
                             if (!response.ok) {
-                                throw new Error(`OpenWeather API error: ${response.status}`);
+                                return response.json().then(err => { throw new Error(err.error || `Server error: ${response.status}`) });
                             }
                             return response.json();
                         })
@@ -691,12 +691,13 @@
 
             function fetchForecastWeatherData(lat, lng) {
                 return new Promise((resolve, reject) => {
-                    const apiUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lng}&appid=${openWeatherApiKey}&units=metric`;
+                    // Calls our new backend endpoint
+                    const apiUrl = `/weather/forecast?lat=${lat}&lon=${lng}`;
 
                     fetch(apiUrl)
                         .then(response => {
                             if (!response.ok) {
-                                throw new Error(`OpenWeather Forecast API error: ${response.status}`);
+                                return response.json().then(err => { throw new Error(err.error || `Server error: ${response.status}`) });
                             }
                             return response.json();
                         })
@@ -766,7 +767,7 @@
                 try {
                     // The backendUrl should point to where your server.js is running.
                     // Use a relative path for production. It will point to your Netlify function.
-                    const backendUrl = '/.netlify/functions/analyze';
+                    const backendUrl = '/analyze';
 
                     const response = await fetch(backendUrl, {
                         method: 'POST',
@@ -886,7 +887,7 @@
                 chatMessages.scrollTop = chatMessages.scrollHeight;
 
                 try {
-                    const backendUrl = '/.netlify/functions/analyze';
+                    const backendUrl = '/analyze';
 
                     const response = await fetch(backendUrl, {
                         method: 'POST',
