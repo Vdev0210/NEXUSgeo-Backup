@@ -26,13 +26,13 @@ app.post('/analyze', async (req, res) => {
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
 
     // The history from the client already includes the latest user message.
-    // We need to separate the last message from the rest of the history
-    // to use the startChat method correctly.
-    const lastUserMessage = history.pop().parts[0].text;
-    const chat = model.startChat({ history });
+    // We separate the last message to send it, and use the rest as context.
+    const lastUserMessage = history.pop();
+    const chatHistoryForModel = history; // The rest of the array is the history
 
-    // Send the last message to the ongoing chat session that has the previous context.
-    const result = await chat.sendMessage(lastUserMessage);
+    const chat = model.startChat({ history: chatHistoryForModel });
+
+    const result = await chat.sendMessage(lastUserMessage.parts[0].text);
     const response = await result.response;
     const text = response.text();
 
