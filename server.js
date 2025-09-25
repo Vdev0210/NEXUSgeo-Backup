@@ -10,14 +10,15 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// Serve static files (HTML, CSS, JS) from the root directory
-app.use(express.static('public'));
+// Serve static files only for local development
+if (process.env.NODE_ENV !== 'production') {
+  app.use(express.static('public'));
+}
 
-// --- AI Analysis Endpoint ---
-
-// Initialize Google Generative AI
-// Make sure your GOOGLE_API_KEY is set in your .env file
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+let genAI;
+if (process.env.GOOGLE_API_KEY) {
+  genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+}
 let openai;
 if (process.env.OPENAI_API_KEY) {
   openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -150,6 +151,11 @@ app.get('/weather/air-quality', async (req, res) => {
   }
 });
 
+
+// Test route for debugging
+app.get('/test', (req, res) => {
+  res.json({ message: 'Server is running', timestamp: new Date().toISOString() });
+});
 
 // Export the app for serverless environments like Netlify
 module.exports = app;
