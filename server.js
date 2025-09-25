@@ -18,7 +18,10 @@ app.use(express.static('public'));
 // Initialize Google Generative AI
 // Make sure your GOOGLE_API_KEY is set in your .env file
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+let openai;
+if (process.env.OPENAI_API_KEY) {
+  openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+}
 const OPENWEATHER_API_KEY = process.env.OPENWEATHER_API_KEY;
 
 // --- Diagnostic Logging ---
