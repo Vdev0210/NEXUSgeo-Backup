@@ -76,7 +76,7 @@ app.post('/analyze', async (req, res) => {
       try {
         // Format history for OpenAI
         const messages = history.map(msg => ({
-          role: msg.role,
+          role: msg.role === 'model' ? 'assistant' : msg.role,
           content: msg.parts[0].text
         }));
 

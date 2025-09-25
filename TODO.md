@@ -1,3 +1,3 @@
 - [x] Add OpenAI import and initialization in server.js
 - [x] Modify /analyze endpoint to add fallback to OpenAI on Gemini 429 error
-- [ ] Test the server locally
+- [x] Test the server locally
