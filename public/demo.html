@@ -397,8 +397,7 @@
 
                 // --- Dynamic Backend URL ---
                 // This determines the correct API path for local development vs. deployed site.
-                const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-                const apiBaseUrl = isLocal ? '' : '/.netlify/functions/analyze';
+                const apiBaseUrl = '';
 
                 // The Gemini API key is now used on the server.
 

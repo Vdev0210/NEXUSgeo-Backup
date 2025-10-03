@@ -1,7 +1,15 @@
-const serverless = require('serverless-http');
-// It needs to go UP one directory to find server.js in the root
-const app = require('../server'); 
+const functions = require('firebase-functions');
 
-// Wrap the app for serverless execution
-const handler = serverless(app);
-module.exports.handler = handler;
+// Set environment variables from Firebase config for compatibility
+const config = functions.config();
+if (config.openai && config.openai.api_key) {
+  process.env.OPENAI_API_KEY = config.openai.api_key;
+}
+if (config.openweather && config.openweather.api_key) {
+  process.env.OPENWEATHER_API_KEY = config.openweather.api_key;
+}
+
+// It needs to go to lib directory
+const app = require('./lib/app');
+
+exports.analyze = functions.https.onRequest(app);

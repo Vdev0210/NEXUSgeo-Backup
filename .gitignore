@@ -77,8 +77,6 @@ temp/
 ehthumbs.db
 Thumbs.db
 
-# Netlify build cache
-.netlify/
 
 # Optional: Ignore build output
 dist/

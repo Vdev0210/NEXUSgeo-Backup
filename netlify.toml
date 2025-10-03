@@ -1,6 +1,0 @@
-[functions]
-  directory = "functions/"
-
-[build]
-  functions = "functions/"
-  publish = "public/"
