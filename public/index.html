@@ -3376,8 +3376,8 @@ h3 {
 
                 // --- Dynamic Backend URL ---
                 // This determines the correct API path for local development vs. deployed site.
-                const apiBaseUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:') ? 'http://localhost:3001' : '';
-                
+                const apiBaseUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:3001' : '/.netlify/functions/app';
+
                 // The Gemini API key is now used on the server.
 
             // Create a slightly larger icon for the main location
@@ -4157,6 +4157,5 @@ h3 {
         // Add notification styles dynamically
         // The old dynamic style injection is no longer needed as styles are in the main <style> tag.
     </script>
-    <script src="lib/app.js"></script>
 </body>
 </html>
