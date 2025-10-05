@@ -75,7 +75,7 @@ app.get('/weather/current', async (req, res) => {
   if (!lat || !lon) return res.status(400).json({ error: 'Latitude and longitude are required.' });
   if (!OPENWEATHER_API_KEY) return res.status(500).json({ error: 'OpenWeather API Key is missing.' });
   try {
-    const apiUrl = `http://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${OPENWEATHER_API_KEY}&units=metric`;
+    const apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${OPENWEATHER_API_KEY}&units=metric`;
     const response = await axios.get(apiUrl);
     res.json(response.data);
   } catch (error) {
