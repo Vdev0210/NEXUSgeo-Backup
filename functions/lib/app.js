@@ -16,9 +16,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 let openai;
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-if (OPENAI_API_KEY) {
-  openai = new OpenAI({ apiKey: OPENAI_API_KEY });
-}
+openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 const OPENWEATHER_API_KEY = process.env.OPENWEATHER_API_KEY;
 
 // --- Diagnostic Logging ---
@@ -113,7 +111,6 @@ app.get('/weather/air-quality', async (req, res) => {
     handleApiError(error, res, 'OpenWeather Air Quality');
   }
 });
-
 
 // Test route for debugging
 app.get('/test', (req, res) => {

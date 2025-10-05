@@ -1,11 +1,6 @@
-# TODO: Remove Gemini API and Make OpenAI Primary
+# TODO List for AQI Meter and Demo Layout Improvements
 
-## Steps to Complete
-- [x] Read public/gemini-pro.js to understand its content and determine if it needs removal or update
-- [x] Read public/script.js to check for any references to gemini-pro.js
-- [x] Remove or update public/gemini-pro.js based on content
-- [x] Update public/script.js if needed to remove Gemini references
-- [x] Edit package.json to remove @google/generative-ai dependency
-- [x] Run npm uninstall @google/generative-ai
-- [x] Test the server locally to ensure it runs without errors
-- [x] Verify /analyze endpoint works with OpenAI
+- [ ] Enhance AQI meter aesthetics with modern visual effects (glows, shadows, improved gradients, smooth animations)
+- [ ] Improve needle movement animation and add visual feedback
+- [ ] Align and polish demo webpage containers for better layout and visual appeal
+- [ ] Test changes in the running app to ensure functionality and aesthetics

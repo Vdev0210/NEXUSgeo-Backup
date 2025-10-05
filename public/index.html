@@ -1,31 +1,2231 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="scroll-behavior: smooth; --scroll-padding: 80px;">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NASA Hackathon - Space Data Solutions</title>
-    <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Grotesk:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Leaflet and plugins for Demo page -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    <!-- MapLibre GL JS -->
+    <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
+    <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
+    <!-- Mapbox GL Leaflet plugin to integrate MapLibre with Leaflet -->
+    <script src="https://unpkg.com/mapbox-gl-leaflet/leaflet-mapbox-gl.js"></script>
+    <style>
+/* NASA Hackathon - Dark Space Theme CSS */
+
+:root {
+    --primary-dark: #0a0a0f;
+    --secondary-dark: #1a1a2e;
+    --accent-blue: #00d4ff;
+    --accent-purple: #7b2cbf;
+    --accent-cyan: #00ff88;
+    --text-primary: #ffffff;
+    --text-secondary: #b8c5d1;
+    --text-muted: #8a9ab0;
+    --bg-card: rgba(26, 26, 46, 0.8);
+    --bg-overlay: rgba(10, 10, 15, 0.9);
+    --border-color: rgba(0, 212, 255, 0.3);
+    --success-color: #00ff88;
+    --warning-color: #ffaa00;
+    --error-color: #ff4444;
+    --shadow-dark: 0 8px 32px rgba(0, 0, 0, 0.5);
+    --shadow-glow: 0 0 20px rgba(0, 212, 255, 0.3);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Space Grotesk', sans-serif;
+    background: var(--primary-dark);
+    color: var(--text-primary);
+    line-height: 1.6;
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* Space Background Animation */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background:
+        radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.2) 0%, transparent 50%);
+    z-index: -2;
+}
+
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image:
+        radial-gradient(2px 2px at 20px 30px, #eee, transparent),
+        radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
+        radial-gradient(1px 1px at 90px 40px, #fff, transparent),
+        radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.6), transparent),
+        radial-gradient(2px 2px at 160px 30px, rgba(255,255,255,0.8), transparent);
+    background-repeat: repeat;
+    background-size: 200px 100px;
+    animation: stars 20s linear infinite;
+    z-index: -1;
+}
+
+@keyframes stars {
+    from { transform: translateY(0px); }
+    to { transform: translateY(-100px); }
+}
+
+/* Weather Legend Animation Styles from demo.html */
+.weather-animation-container {
+    position: relative;
+    width: 100%;
+    height: 60px;
+    overflow: hidden;
+    border-radius: 8px;
+    background: linear-gradient(to bottom, #3a7bd5, #00d2ff);
+    margin-bottom: 8px;
+}
+
+.sun {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 30px;
+    height: 30px;
+    background: #ffeb3b;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 20px #ffeb3b;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(1.1); }
+    100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+.cloud {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+    animation: move-clouds linear infinite;
+}
+
+.cloud.base { width: 100px; height: 30px; top: 25px; left: -100px; animation-duration: 20s; }
+.cloud.middle { width: 80px; height: 25px; top: 15px; left: -80px; animation-duration: 15s; animation-delay: -5s; }
+.cloud.top { width: 60px; height: 20px; top: 5px; left: -60px; animation-duration: 10s; animation-delay: -2s; }
+
+.cloud::before, .cloud::after {
+    content: '';
+    position: absolute;
+    background: inherit;
+    border-radius: inherit;
+}
+
+.cloud::before {
+    width: 50%;
+    height: 150%;
+    top: -75%;
+    left: 25%;
+}
+
+.cloud::after {
+    width: 70%;
+    height: 200%;
+    top: -100%;
+    right: 15%;
+}
+
+@keyframes move-clouds {
+    from { left: -150px; }
+    to { left: 100%; }
+}
+
+.rain {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.raindrop {
+    position: absolute;
+    bottom: 100%;
+    width: 1px;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.6);
+    animation: rain-fall linear infinite;
+}
+
+@keyframes rain-fall {
+    to {
+        transform: translateY(200px);
+    }
+}
+
+.drizzle::before {
+    background-size: 2px 5px, 5px 2px;
+}
+
+.snow {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.snow::before {
+    content: '❄';
+    position: absolute;
+    color: white;
+    font-size: 20px;
+    animation: fall 10s linear infinite;
+    left: 20%;
+}
+.snow::after {
+    content: '❄';
+    position: absolute;
+    color: white;
+    font-size: 15px;
+    animation: fall 15s linear infinite reverse;
+    left: 60%;
+}
+
+@keyframes fall {
+    from { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    to { transform: translateY(80px) rotate(360deg); opacity: 0; }
+}
+
+.thunderstorm {
+    background: #2c3e50;
+    animation: flash 1.5s infinite;
+}
+
+@keyframes flash {
+    0%, 100% { background: #2c3e50; }
+    50% { background: #bdc3c7; }
+}
+
+.fog {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.3);
+    animation: fog-move 5s infinite alternate;
+}
+
+@keyframes fog-move {
+    from { opacity: 0.2; }
+    to { opacity: 0.6; }
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* Header Styles */
+.header {
+    background: var(--bg-overlay);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+    box-shadow: var(--shadow-dark);
+}
+
+.header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+    padding: 1rem 0;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent-blue);
+    text-shadow: var(--shadow-glow);
+    text-decoration: none;
+}
+
+.logo:link,
+.logo:visited,
+.logo:hover,
+.logo:active {
+    text-decoration: none;
+}
+
+.logo i {
+    font-size: 2rem;
+    animation: rotate 10s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.logo-geo {
+    color: var(--success-color);
+}
+
+/* Navigation Styles */
+.nav {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.nav-menu {
+    display: flex;
+    list-style: none;
+    gap: 1.5rem;
+    margin: 0;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    flex: 1;
+}
+
+.nav-link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+    padding: 0.5rem 0;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    color: var(--accent-blue);
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--accent-blue);
+    transition: width 0.3s ease;
+}
+
+.nav-link:hover::after,
+.nav-link.active::after {
+    width: 100%;
+}
+
+.nav-toggle {
+    display: none;
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: var(--accent-blue);
+}
+
+.user-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.logout-btn {
+    background: var(--error-color);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.logout-btn:hover {
+    background: #ff6666;
+    transform: translateY(-2px);
+}
+
+/* Main Content */
+.main {
+    min-height: calc(100vh - 80px);
+    padding: 2rem 0;
+}
+
+.tab-content {
+    display: none;
+    animation: fadeIn 0.5s ease;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Hero Section */
+.hero {
+    text-align: center;
+    padding: 4rem 0;
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(123, 44, 191, 0.1) 100%);
+    border-radius: 20px;
+    margin-bottom: 3rem;
+    border: 1px solid var(--border-color);
+}
+
+.hero h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 3.5rem;
+    font-weight: 900;
+    background: linear-gradient(45deg, var(--accent-blue), var(--accent-purple), var(--accent-cyan));
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientShift 3s ease infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.hero-subtitle {
+    font-size: 1.3rem;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+}
+
+.hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    margin-top: 2rem;
+}
+
+.stat {
+    text-align: center;
+}
+
+.stat-number {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent-cyan);
+    display: block;
+}
+
+.stat-label {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* Content Sections */
+h2 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--accent-blue);
+}
+
+h3 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: var(--accent-cyan);
+}
+
+/* Feature Cards */
+.features-grid,
+.solution-diagram,
+.impact-grid,
+.story-grid,
+.team-grid,
+.data-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin: 2rem 0;
+}
+
+.feature-card,
+.solution-step,
+.impact-item,
+.story-item,
+.team-member,
+.data-source {
+    background: var(--bg-card);
+    padding: 2rem;
+    border-radius: 15px;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.feature-card:hover,
+.solution-step:hover,
+.impact-item:hover,
+.story-item:hover,
+.team-member:hover,
+.data-source:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-glow);
+    border-color: var(--accent-blue);
+}
+
+.feature-card i,
+.solution-step i,
+.impact-item i,
+.story-item i,
+.team-member i,
+.data-source i {
+    font-size: 3rem;
+    color: var(--accent-blue);
+    margin-bottom: 1rem;
+}
+
+.solution-step {
+    position: relative;
+}
+
+.step-number {
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    background: var(--accent-blue);
+    color: var(--primary-dark);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+/* Tech Stack */
+.tech-stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+.tech-item {
+    background: linear-gradient(45deg, var(--accent-blue), var(--accent-purple));
+    color: var(--primary-dark);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Impact Metrics */
+.impact-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    margin: 2rem 0;
+}
+
+.metric {
+    text-align: center;
+    background: var(--bg-card);
+    padding: 2rem;
+    border-radius: 15px;
+    border: 1px solid var(--border-color);
+}
+
+.metric-number {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--accent-cyan);
+    display: block;
+}
+
+.metric-label {
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+/* Demo Section */
+.demo-controls {
+    background: var(--bg-card);
+    padding: 2rem;
+    border-radius: 15px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 2rem;
+}
+
+.demo-select {
+    background: var(--secondary-dark);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    margin-right: 1rem;
+}
+
+.demo-btn {
+    background: var(--accent-blue);
+    color: var(--primary-dark);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.demo-btn:hover {
+    background: var(--accent-cyan);
+    transform: translateY(-2px);
+}
+
+.demo-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto 1fr;
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.demo-left {
+    grid-column: 1 / 2;
+    grid-row: 1 / 3; /* Span both rows */
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.demo-right {
+    grid-column: 2 / 3;
+    grid-row: 1 / 3; /* Span both rows */
+    display: grid;
+    grid-template-rows: auto auto 1fr;
+    gap: 1.5rem;
+    overflow: hidden; /* Prevent content from overflowing the grid cell */
+}
+
+.demo-right-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.satellite-map {
+    background: var(--secondary-dark);
+    border: 2px solid var(--border-color);
+    border-radius: 15px;
+    height: 400px; /* Reverted to fixed height to control map size */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.map-placeholder {
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.map-placeholder i {
+    font-size: 4rem;
+    color: var(--accent-blue);
+    margin-bottom: 1rem;
+}
+
+.map-note {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.demo-info {
+    background: var(--bg-card);
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    padding: 1rem;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(5px);
+    z-index: 401; /* Above map tiles */
+}
+
+.data-info p {
+    margin-bottom: 0.5rem;
+}
+
+/* Team Section */
+.member-avatar {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(45deg, var(--accent-blue), var(--accent-purple));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 2rem;
+    color: var(--primary-dark);
+}
+
+.member-role {
+    color: var(--accent-cyan);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.member-bio {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* Contact Section */
+.contact-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+}
+
+.contact-item {
+    text-align: center;
+    background: var(--bg-card);
+    padding: 2rem;
+    border-radius: 15px;
+    border: 1px solid var(--border-color);
+}
+
+.contact-item i {
+    font-size: 2rem;
+    color: var(--accent-blue);
+    margin-bottom: 1rem;
+}
+
+.contact-form {
+    background: var(--bg-card);
+    padding: 2rem;
+    border-radius: 15px;
+    border: 1px solid var(--border-color);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary);
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--secondary-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.password-input {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 10px;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.forgot-password {
+    color: var(--accent-blue);
+    text-decoration: none;
+}
+
+.forgot-password:hover {
+    color: var(--accent-cyan);
+}
+
+.submit-btn {
+    width: 100%;
+    background: var(--accent-blue);
+    color: var(--primary-dark);
+    border: none;
+    padding: 1rem;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.submit-btn:hover {
+    background: var(--accent-cyan);
+    transform: translateY(-2px);
+}
+
+/* Data Sources */
+.data-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.data-details span {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.data-details span strong {
+    color: var(--accent-cyan);
+}
+
+/* Footer */
+.footer {
+    background: var(--bg-overlay);
+    border-top: 1px solid var(--border-color);
+    padding: 2rem 0;
+    margin-top: 4rem;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.footer-links {
+    display: flex;
+    gap: 2rem;
+}
+
+.footer-links a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+    color: var(--accent-blue);
+}
+
+.footer-bottom {
+    text-align: center;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(0, 212, 255, 0.2);
+    color: var(--text-muted);
+}
+
+/* Login Page Styles */
+.login-body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-container {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    z-index: 10;
+}
+
+.login-card {
+    background: var(--bg-overlay);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: var(--shadow-dark);
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.login-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent-blue);
+    margin-bottom: 1rem;
+}
+
+.login-header h1 {
+    font-family: 'Orbitron', sans-serif;
+    color: var(--accent-cyan);
+    margin-bottom: 0.5rem;
+}
+
+.login-header p {
+    color: var(--text-secondary);
+}
+
+.login-form {
+    margin-bottom: 2rem;
+}
+
+.login-footer {
+    text-align: center;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(0, 212, 255, 0.2);
+}
+
+.demo-credentials {
+    background: var(--secondary-dark);
+    padding: 1rem;
+    border-radius: 10px;
+    margin: 1rem 0;
+}
+
+.demo-credentials p {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.security-note {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.login-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+}
+
+.space-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at center, rgba(0, 212, 255, 0.1) 0%, transparent 70%);
+}
+
+.floating-elements {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.satellite {
+    position: absolute;
+    top: 20%;
+    right: 10%;
+    width: 60px;
+    height: 60px;
+    background: radial-gradient(circle, var(--accent-blue), transparent);
+    border-radius: 50%;
+    animation: float 6s ease-in-out infinite;
+}
+
+.planet {
+    position: absolute;
+    bottom: 20%;
+    left: 10%;
+    width: 80px;
+    height: 80px;
+    background: radial-gradient(circle, var(--accent-purple), transparent);
+    border-radius: 50%;
+    animation: float 8s ease-in-out infinite reverse;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(180deg); }
+}
+
+/* Login Check Overlay */
+.login-check {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-overlay);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-overlay {
+    background: var(--bg-overlay);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 3rem;
+    text-align: center;
+    max-width: 400px;
+}
+
+.login-prompt h2 {
+    color: var(--error-color);
+    margin-bottom: 1rem;
+}
+
+.login-prompt p {
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+}
+
+.login-btn {
+    background: var(--accent-blue);
+    color: var(--primary-dark);
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.login-btn:hover {
+    background: var(--accent-cyan);
+    transform: translateY(-2px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .nav-menu {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: var(--bg-overlay);
+        flex-direction: column;
+        padding: 1rem;
+        backdrop-filter: blur(10px);
+    }
+
+    .nav-menu.active {
+        display: flex;
+    }
+
+    .nav-toggle {
+        display: block;
+    }
+
+    .hero h1 {
+        font-size: 2.5rem;
+    }
+
+    .hero-stats {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .contact-content {
+        grid-template-columns: 1fr;
+    }
+
+    .footer-content {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .footer-links {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .demo-layout {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .demo-left,
+    .demo-right {
+        flex: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0 15px;
+    }
+
+    .hero {
+        padding: 2rem 1rem;
+    }
+
+    .hero h1 {
+        font-size: 2rem;
+    }
+
+    .features-grid,
+    .solution-diagram,
+    .impact-grid,
+    .team-grid,
+    .data-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .impact-metrics {
+        grid-template-columns: 1fr;
+    }
+
+    /* Enhanced mobile touch targets */
+    .demo-btn,
+    .submit-btn,
+    .login-btn {
+        min-height: 44px;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+    }
+
+    .nav-link {
+        padding: 1rem 0;
+        font-size: 1.1rem;
+    }
+
+    .chat-input-container .demo-input {
+        font-size: 1rem;
+        padding: 1rem 1.5rem;
+    }
+
+    .chat-input-container .demo-btn {
+        width: 60px;
+        height: 60px;
+    }
+
+    /* Improve readability on small screens */
+    .hero-subtitle {
+        font-size: 1.1rem;
+    }
+
+    .feature-card,
+    .impact-item,
+    .story-item,
+    .team-member,
+    .data-source {
+        padding: 1.5rem 1rem;
+    }
+
+    /* Make demo controls more touch-friendly */
+    .demo-controls h3 {
+        font-size: 1.2rem;
+    }
+
+    .manual-location {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .location-input-container {
+        width: 100%;
+    }
+
+    /* Optimize map for mobile */
+    .satellite-map {
+        height: 300px;
+    }
+
+    /* Make chat messages more readable */
+    .chat-message {
+        font-size: 1rem;
+        padding: 1rem 1.25rem;
+    }
+
+    /* Adjust footer for mobile */
+    .footer-content {
+        text-align: center;
+    }
+
+    .footer-links {
+        justify-content: center;
+    }
+}
+
+/* Additional tablet breakpoint for better intermediate support */
+@media (max-width: 1024px) and (min-width: 769px) {
+    .hero h1 {
+        font-size: 2.8rem;
+    }
+
+    .demo-layout {
+        gap: 15px;
+    }
+
+    .satellite-map {
+        height: 350px;
+    }
+
+    .chat-messages {
+        height: 300px;
+    }
+}
+
+/* Landscape mobile optimization */
+@media (max-width: 896px) and (max-height: 414px) {
+    .hero {
+        padding: 1rem;
+    }
+
+    .hero h1 {
+        font-size: 1.8rem;
+    }
+
+    .hero-stats {
+        flex-direction: row;
+        justify-content: space-around;
+    }
+
+    .satellite-map {
+        height: 250px;
+    }
+
+    .chat-messages {
+        height: 250px;
+    }
+}
+
+/* Architecture Diagram Styles */
+.architecture-diagram {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.architecture-diagram h3 {
+    color: #00d4ff;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.architecture-diagram svg {
+    display: block;
+    max-width: 900px;
+    height: auto;
+    margin: 0 auto;
+    border-radius: 8px;
+    background: transparent;
+}
+
+.architecture-diagram svg text {
+    font-weight: 500;
+}
+
+.architecture-diagram svg rect {
+    transition: all 0.3s ease;
+}
+
+.architecture-diagram svg rect:hover {
+    stroke-width: 3;
+    filter: brightness(1.2);
+}
+
+.architecture-diagram svg path {
+    transition: all 0.3s ease;
+}
+
+.architecture-diagram svg path:hover {
+    stroke-width: 3;
+    filter: brightness(1.2);
+}
+
+/* Navigation Separator */
+.nav-separator {
+    color: #00d4ff;
+    font-weight: bold;
+    margin: 0 8px;
+    font-size: 14px;
+    opacity: 0.7;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Demo Location Menu Styles */
+.location-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.manual-location {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.location-input-container {
+    position: relative;
+    flex: 1;
+}
+
+.demo-input {
+    background: var(--secondary-dark);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    font-size: 1rem;
+    width: 100%;
+}
+
+.demo-input:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+}
+
+.demo-input::placeholder {
+    color: var(--text-muted);
+}
+
+.location-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-top: none;
+    border-radius: 0 0 5px 5px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    z-index: 1000; /* Needs to be less than header (1001) but more than map controls */
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+}
+
+.suggestion-item {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+    transition: all 0.2s ease;
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+.suggestion-item:hover,
+.suggestion-item.highlighted {
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 212, 255, 0.05));
+    border-left: 3px solid var(--accent-blue);
+}
+
+.suggestion-name {
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    line-height: 1.3;
+}
+
+.suggestion-type {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: capitalize;
+}
+
+/* Leaflet Legend Styles */
+.info.legend {
+    background: var(--bg-card);
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-dark);
+    color: var(--text-primary);
+    backdrop-filter: blur(5px);
+    line-height: 1.5;
+}
+
+.info.legend h4 {
+    margin: 0 0 5px;
+    color: var(--accent-blue);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1rem;
+    text-align: center;
+}
+
+.info.legend i {
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    opacity: 0.85;
+    border: 1px solid rgba(0, 0, 0, 0.5);
+    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.2), 0 1px 0 rgba(0, 0, 0, 0.2);
+    flex-shrink: 0; /* Prevent the icon from shrinking */
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+/* Suggested Questions */
+.suggested-questions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.suggested-question {
+    background: rgba(42, 42, 78, 0.8);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+.suggested-question:hover {
+    background: var(--secondary-dark);
+    color: var(--accent-blue);
+    transform: translateY(-2px);
+}
+
+/* Chatbot Styling - Enhanced Dialogue Box */
+.chatbot-container {
+    position: fixed;
+    bottom: 90px; /* Position above the toggle button */
+    right: 20px; /* Positioned to the right */
+    width: 450px;
+    max-width: 90vw;
+    border: 2px solid var(--border-color);
+    border-radius: 20px;
+    background: linear-gradient(135deg, var(--bg-card) 0%, rgba(26, 26, 46, 0.9) 100%);
+    backdrop-filter: blur(15px);
+    padding: 2rem;
+    font-family: 'Space Grotesk', sans-serif;
+    box-shadow: var(--shadow-glow), 0 15px 50px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+    z-index: 9999;
+    transform: scale(0.95) translateY(20px);
+    opacity: 0;
+    transform-origin: bottom right; /* Animate from the bottom right */
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.chatbot-container.active {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.chatbot-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple), var(--accent-cyan));
+    border-radius: 20px 20px 0 0;
+}
+
+.chatbot-container h4 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--accent-blue);
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.3rem;
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+}
+
+.chat-close-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.chat-close-btn:hover {
+    color: var(--accent-blue);
+    transform: rotate(90deg);
+}
+
+.chat-messages {
+    height: 350px;
+    overflow-y: auto;
+    background: linear-gradient(135deg, var(--primary-dark) 0%, rgba(10, 10, 15, 0.95) 100%);
+    border: 1px solid var(--border-color);
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.2);
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent-blue) var(--secondary-dark);
+}
+
+.chat-messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+    background: var(--secondary-dark);
+    border-radius: 3px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+    background: var(--accent-blue);
+    border-radius: 3px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-cyan);
+}
+
+.chat-message {
+    padding: 1rem 1.25rem;
+    border-radius: 18px;
+    max-width: 75%;
+    line-height: 1.6;
+    position: relative;
+    animation: messageSlideIn 0.3s ease-out;
+    word-wrap: break-word;
+    hyphens: auto;
+}
+
+@keyframes messageSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.user-message {
+    background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-cyan) 100%);
+    color: var(--primary-dark);
+    align-self: flex-end;
+    border-radius: 18px 18px 4px 18px;
+    box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+    border: 1px solid rgba(0, 212, 255, 0.2);
+}
+
+.user-message::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    right: 15px;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid var(--accent-cyan);
+    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.1));
+}
+
+.assistant-message {
+    background: linear-gradient(135deg, var(--secondary-dark) 0%, rgba(42, 42, 78, 0.8) 100%);
+    color: var(--text-primary);
+    align-self: flex-start;
+    border-radius: 18px 18px 18px 4px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+}
+
+.assistant-message::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 15px;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid var(--secondary-dark);
+    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.1));
+}
+
+.chat-input-container {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.chat-input-container .demo-input {
+    flex: 1;
+    border-radius: 25px;
+    padding: 0.75rem 1.25rem;
+    background: var(--secondary-dark);
+    border: 2px solid var(--border-color);
+    transition: all 0.3s ease;
+    font-size: 1rem;
+}
+
+.chat-input-container .demo-input:focus {
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+    transform: scale(1.02);
+}
+
+.chat-input-container .demo-btn {
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 212, 255, 0.2);
+}
+
+.chat-popup-toggle-btn {
+    position: fixed;
+    bottom: 20px; /* Fixed at the bottom */
+    right: 20px; /* Fixed to the right */
+    background: linear-gradient(45deg, var(--accent-blue), var(--accent-purple));
+    color: var(--text-primary);
+    border: none;
+    border-radius: 30px; /* Pill shape */
+    padding: 0.75rem 1.5rem;
+    font-size: 1.2rem; /* Icon size */
+    cursor: pointer;
+    display: none; /* Hidden by default, shown on demo tab */
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem; /* Space between icon and text */
+    z-index: 9998;
+    box-shadow: 0 5px 20px rgba(0, 212, 255, 0.4);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.chat-popup-toggle-btn span {
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.chat-popup-toggle-btn i {
+    transition: transform 0.3s ease; /* Add transition for smooth icon rotation */
+}
+
+.chat-popup-toggle-btn:hover {
+    transform: scale(1.05); /* Keep a subtle scale effect on the whole button */
+    box-shadow: 0 8px 30px rgba(0, 212, 255, 0.6);
+}
+
+.chat-popup-toggle-btn:hover i {
+    transform: rotate(20deg); /* Rotate only the icon on hover */
+}
+
+.ai-report-toggle-btn {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: linear-gradient(45deg, var(--accent-cyan), var(--accent-blue));
+    color: var(--text-primary);
+    border: none;
+    border-radius: 30px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: none; /* Hidden by default */
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    z-index: 9998;
+    box-shadow: 0 5px 20px rgba(0, 255, 136, 0.4);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.ai-report-toggle-btn span {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.ai-report-toggle-btn i {
+    transition: transform 0.3s ease;
+}
+
+.ai-report-toggle-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 30px rgba(0, 255, 136, 0.6);
+}
+
+/* Notification Popup Styles */
+.notification-popup {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 320px;
+    max-width: 90vw;
+    background: linear-gradient(135deg, var(--bg-card) 0%, rgba(26, 26, 46, 0.9) 100%);
+    backdrop-filter: blur(15px);
+    padding: 1.5rem;
+    border-radius: 15px;
+    border: 2px solid var(--border-color);
+    box-shadow: var(--shadow-glow), 0 10px 40px rgba(0, 0, 0, 0.3);
+    z-index: 10001;
+    transform: scale(0.95) translateY(-20px);
+    opacity: 0;
+    transform-origin: top right;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.notification-popup.active {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.notification-popup h4 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--warning-color);
+    margin: 0 0 1rem 0;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.1rem;
+}
+
+.notification-message {
+    font-size: 1rem;
+}
+
+/* Contact Page Specific */
+
+
+.contact-info h3, .contact-form-section h3 {
+    margin-bottom: 1.5rem;
+}
+
+.contact-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    text-align: left;
+}
+
+.contact-item i {
+    font-size: 1.5rem;
+    color: var(--accent-blue);
+    margin-top: 5px;
+}
+
+.contact-item h4 {
+    margin-bottom: 0.25rem;
+    font-size: 1.1rem;
+}
+
+.contact-item p {
+    margin: 0;
+    color: var(--text-secondary);
+}
+
+.contact-form {
+    background: var(--bg-card);
+    padding: 2rem;
+    border-radius: 15px;
+    border: 1px solid var(--border-color);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary);
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--secondary-dark);
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.submit-btn {
+    width: 100%;
+    background: var(--accent-blue);
+    color: var(--primary-dark);
+    border: none;
+    padding: 1rem;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.submit-btn:hover {
+    background: var(--accent-cyan);
+    transform: translateY(-2px);
+}
+
+/* Problem Page Specific */
+.problem-statement ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.problem-statement li {
+    background: var(--bg-card);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    border-left: 4px solid var(--accent-blue);
+}
+
+.problem-statement li strong {
+    color: var(--accent-cyan);
+}
+
+/* Solution Page Specific */
+.solution-overview {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* Team Page Specific */
+.team-intro {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* Impact Page Specific */
+.impact-overview, .impact-vision {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.impact-vision {
+    background: var(--bg-card);
+    padding: 2rem;
+    border-radius: 15px;
+    border: 1px solid var(--border-color);
+    margin-top: 2rem;
+}
+
+.metric p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
+}
+
+/* Data Sources Page Specific */
+.data-intro {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* Contact Page Specific */
+.contact-intro {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* General Section Styling */
+.content-section {
+    padding: 2rem 0;
+}
+
+.content-section .container {
+    max-width: 1000px;
+}
+
+/* Status indicator for demo page */
+.status-good {
+    color: var(--success-color);
+}
+.status-bad {
+    color: var(--error-color);
+}
+
+/* Pollutant list for demo page */
+.pollutant-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 0.9rem;
+}
+.pollutant-list li {
+    margin-bottom: 0.25rem;
+}
+
+/* AI Report styles for demo page */
+.ai-report {
+    position: fixed;
+    bottom: 90px;
+    left: 20px;
+    width: 450px;
+    max-width: 90vw;
+    background: linear-gradient(135deg, var(--bg-card) 0%, rgba(26, 26, 46, 0.9) 100%);
+    backdrop-filter: blur(15px);
+    padding: 2rem;
+    border-radius: 20px;
+    border: 2px solid var(--border-color);
+    box-shadow: var(--shadow-glow), 0 15px 50px rgba(0, 0, 0, 0.4);
+    z-index: 9999;
+    transform: scale(0.95) translateY(20px);
+    opacity: 0;
+    transform-origin: bottom left;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    pointer-events: none;
+}
+.ai-report.active {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.ai-report h4 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--accent-blue);
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.3rem;
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+}
+.results-content p {
+    margin-bottom: 0.5rem;
+}
+.report-finding.error {
+    color: var(--error-color);
+}
+
+.demo-info-right {
+    background: var(--bg-card);
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+}
+
+/* Ensure leaflet popup has dark theme */
+.leaflet-popup-content-wrapper {
+    background: var(--secondary-dark);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-dark);
+}
+.leaflet-popup-content {
+    font-family: 'Space Grotesk', sans-serif;
+}
+.leaflet-popup-tip {
+    background: var(--secondary-dark);
+}
+.leaflet-container a.leaflet-popup-close-button {
+    color: var(--text-secondary);
+}
+.leaflet-container a.leaflet-popup-close-button:hover {
+    color: var(--text-primary);
+}
+
+/* AQI Semi-Circle Meter Styles */
+.aqi-meter-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 1rem 0;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, var(--bg-card) 0%, rgba(42, 42, 78, 0.9) 100%);
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-dark), 0 0 30px rgba(0, 212, 255, 0.1);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.aqi-meter-container:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-glow), 0 0 40px rgba(0, 212, 255, 0.2);
+}
+
+.aqi-meter {
+    position: relative;
+    width: 220px;
+    height: 110px;
+    border-radius: 110px 110px 0 0; /* Creates the semi-circle shape */
+    background: conic-gradient(at center bottom, from 180deg, 
+        #00ff88 15deg,    /* Green */
+        #ffaa00 45deg,    /* Yellow */
+        #ff6600 75deg,    /* Orange */
+        #ff4444 105deg,   /* Red */
+        #aa00ff 135deg,   /* Purple */
+        #8b0000 165deg    /* Maroon */
+    ); /* Smooth gradient based on label positions */
+    border: 2px solid var(--border-color);
+    border-bottom: none;
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3), 0 4px 20px rgba(0, 0, 0, 0.2);
+    filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.1));
+    margin: 0 auto; /* Center the meter */
+}
+
+.aqi-needle {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    width: 5px;
+    height: 85px;
+    background: linear-gradient(to top, var(--text-primary) 0%, #ffffff 100%);
+    transform-origin: bottom center;
+    transform: translateX(-50%) rotate(-90deg); /* Start at the beginning of the scale */
+    transition: transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    z-index: 10;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 0 0 30px rgba(0, 212, 255, 0.5);
+}
+
+.aqi-needle::after {
+    content: '';
+    position: absolute;
+    bottom: -10px; /* Adjusted to align at the bottom */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 20px;
+    background: transparent;
+    border-radius: 50%;
+    border: 3px solid var(--border-color);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.5), inset 0 1px 3px rgba(0, 0, 0, 0.3), 0 0 5px rgba(0, 212, 255, 0.5);
+}
+
+.aqi-needle.moving {
+    animation: needleGlow 1.2s ease-out;
+}
+
+@keyframes needleGlow {
+    0% { box-shadow: 0 0 10px rgba(255, 255, 255, 0.5); }
+    50% { box-shadow: 0 0 25px rgba(0, 212, 255, 0.9), 0 0 40px rgba(255, 255, 255, 0.6); }
+    100% { box-shadow: 0 0 10px rgba(255, 255, 255, 0.5); }
+}
+
+.aqi-value-display {
+    text-align: center;
+    margin-top: 0.75rem;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    background: linear-gradient(45deg, var(--accent-blue), var(--accent-cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+}
+
+.aqi-status-text {
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+    font-size: 1.1rem;
+}
+
+.aqi-numeric-value {
+    font-size: 1.8rem;
+    color: var(--accent-cyan);
+    text-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+}
+
+/* AI Analysis Page Styles */
+.ai-analysis-section {
+    text-align: center;
+    padding: 2rem 0;
+}
+
+.ai-analysis-controls {
+    background: var(--bg-card);
+    padding: 2rem;
+    border-radius: 15px;
+    border: 1px solid var(--border-color);
+    margin: 2rem auto;
+    max-width: 600px;
+}
+
+.analysis-display-container {
+    margin-top: 3rem;
+    text-align: left;
+}
+
+.methodology-insights {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-color);
+}
+
+
+
+    </style>
 </head>
 <body>
     <!-- Login Check -->
     <div id="loginCheck" class="login-check" style="display: none;">
-        <div class="login-overlay">
-            <div class="login-prompt">
-                <h2>Access Restricted</h2>
-                <p>Please log in to access this NASA Hackathon platform.</p>
-                <button onclick="window.location.href='login.html'" class="login-btn">Login</button>
+        <div class="login-container">
+            <div class="login-card">
+                <div class="login-header">
+                    <div class="login-logo">
+                        <i class="fas fa-rocket" style="animation: rotate 10s linear infinite;"></i>
+                        <span>NEXUS <span class="logo-geo">geo</span></span>
+                    </div>
+                    <h1>Access Platform</h1>
+                    <p>Enter your credentials to access the Space Data Solutions platform</p>
+                </div>
+    
+                <form id="loginForm" class="login-form">
+                    <div class="form-group">
+                        <label for="username"><i class="fas fa-user"></i> Username</label>
+                        <input type="text" id="username" name="username" required>
+                    </div>
+    
+                    <div class="form-group">
+                        <label for="password"><i class="fas fa-lock"></i> Password</label>
+                        <div class="password-input">
+                            <input type="password" id="password" name="password" required>
+                            <button type="button" id="passwordToggle" class="password-toggle"><i class="fas fa-eye"></i></button>
+                        </div>
+                    </div>
+    
+                    <button type="submit" class="login-btn"><i class="fas fa-sign-in-alt"></i> Access Platform</button>
+                </form>
+    
+                <div class="login-footer">
+                    <p>Demo Credentials:</p>
+                    <div class="demo-credentials">
+                        <p><strong>Username:</strong> nasa</p>
+                        <p><strong>Password:</strong> nasa</p>
+                    </div>
+                    <p class="security-note"><i class="fas fa-shield-alt"></i> Secure NASA Hackathon Platform</p>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Header -->
-    <header class="header">
+    <header id="mainHeader" class="header" style="display: none;">
         <div class="container">
-            <a href="home.html" class="logo" aria-label="Home">
+            <a href="#home" class="logo" aria-label="Home">
                 <i class="fas fa-rocket"></i>
                 <span>NEXUS <span class="logo-geo">geo</span></span>
             </a>
@@ -34,25 +2234,25 @@
                     <i class="fas fa-bars"></i>
                 </div>
                 <ul class="nav-menu">
-                    <li><a href="home.html" class="nav-link active">HOME</a></li>
+                    <li><a href="#home" class="nav-link active">HOME</a></li>
                     <li><span class="nav-separator">|</span></li>
-                    <li><a href="problem.html" class="nav-link">PROBLEM STATEMENT</a></li>
+                    <li><a href="#problem" class="nav-link">PROBLEM STATEMENT</a></li>
                     <li><span class="nav-separator">|</span></li>
-                    <li><a href="solution.html" class="nav-link">SOLUTION</a></li>
+                    <li><a href="#solution" class="nav-link">SOLUTION</a></li>
                     <li><span class="nav-separator">|</span></li>
-                    <li><a href="features.html" class="nav-link">FEATURES</a></li>
+                    <li><a href="#features" class="nav-link">FEATURES</a></li>
                     <li><span class="nav-separator">|</span></li>
-                    <li><a href="impact.html" class="nav-link">IMPACT</a></li>
+                    <li><a href="#impact" class="nav-link">IMPACT</a></li>
                     <li><span class="nav-separator">|</span></li>
-                    <li><a href="data-sources.html" class="nav-link">DATA SOURCES</a></li>
+                    <li><a href="#data-sources" class="nav-link">DATA SOURCES</a></li>
                     <li><span class="nav-separator">|</span></li>
-                    <li><a href="demo.html" class="nav-link">DEMO</a></li>
+                    <li><a href="#demo" class="nav-link">DEMO</a></li>
                     <li><span class="nav-separator">|</span></li>
-                    <li><a href="ai-analysis.html" class="nav-link">AI ANALYSIS</a></li>
+                    <li><a href="#ai-analysis" class="nav-link">URBAN PLANNER REPORT</a></li>
                     <li><span class="nav-separator">|</span></li>
-                    <li><a href="team.html" class="nav-link">TEAM</a></li>
+                    <li><a href="#team" class="nav-link">TEAM</a></li>
                     <li><span class="nav-separator">|</span></li>
-                    <li><a href="contact.html" class="nav-link">CONTACT</a></li>
+                    <li><a href="#contact" class="nav-link">CONTACT</a></li>
                 </ul>
                 <div class="user-controls">
                     <button id="logoutBtn" class="logout-btn" style="display: none;">
@@ -64,517 +2264,688 @@
     </header>
 
     <!-- Main Content -->
-    <main class="main">
+    <main id="mainContent" class="main" style="display: none;">
         <div class="container">
-            <!-- HOME Tab -->
-            <section id="home" class="tab-content active">
-                <div class="hero">
-                    <h1>Smart Pathways for Healthy Cities</h1>
-                    <p class="hero-subtitle">We combine NASA Earth Observation data with urban planning intelligence to enable climate-resilient, people-first cities. Includes a secondary real-time air-quality forecasting feature powered by NASA TEMPO and ground sensors.</p>
-                    <div class="hero-stats">
-                        <div class="stat">
-                            <span class="stat-number">24/7</span>
-                            <span class="stat-label">Monitoring</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-number">99.9%</span>
-                            <span class="stat-label">Accuracy</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-number">50TB+</span>
-                            <span class="stat-label">Data Daily</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="overview">
-                    <h2>Our Mission</h2>
-                    <p>Climate change and rapid urbanization threaten city wellbeing. Our platform turns NASA Earth data into practical planning actions: mapping growth, identifying vulnerabilities, and forecasting air quality so city leaders and communities can act before harm occurs.</p>
-
-                    <div class="features-grid">
-                        <div class="feature-card">
-                            <i class="fas fa-city"></i>
-                            <h3>Urban Planning Intelligence</h3>
-                            <p>AI-powered analysis for sustainable city development</p>
-                        </div>
-                        <div class="feature-card">
-                            <i class="fas fa-leaf"></i>
-                            <h3>Climate Resilience</h3>
-                            <p>Environmental monitoring for climate adaptation strategies</p>
-                        </div>
-                        <div class="feature-card">
-                            <i class="fas fa-wind"></i>
-                            <h3>Air Quality Forecasting</h3>
-                            <p>Real-time pollution monitoring and health alerts</p>
+            <div id="home" class="tab-content active">
+                <section class="hero-section">
+                    <div class="hero">
+                        <h1>Smart Pathways for Healthy Cities</h1>
+                        <p class="hero-subtitle">We combine NASA Earth Observation data with urban planning intelligence to enable climate-resilient, people-first cities. Includes a secondary real-time air-quality forecasting feature powered by NASA TEMPO and ground sensors.</p>
+                        <div class="hero-stats">
+                            <div class="stat">
+                                <span class="stat-number">24/7</span>
+                                <span class="stat-label">Monitoring</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-number">99.9%</span>
+                                <span class="stat-label">Accuracy</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-number">50TB+</span>
+                                <span class="stat-label">Data Daily</span>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </section>
-
-            <!-- SOLUTION Tab -->
-            <section id="solution" class="tab-content">
-                <h2>Our Solution</h2>
-                <div class="solution-content">
-                    <div class="solution-diagram">
-                        <div class="solution-step">
-                            <div class="step-number">1</div>
-                            <h3>Data Collection</h3>
-                            <p>NASA Earth observations + urban sensors + ground stations</p>
-                        </div>
-                        <div class="solution-step">
-                            <div class="step-number">2</div>
-                            <h3>AI Processing</h3>
-                            <p>Machine learning models for urban climate analysis</p>
-                        </div>
-                        <div class="solution-step">
-                            <div class="step-number">3</div>
-                            <h3>Planning Intelligence</h3>
-                            <p>Actionable insights for city planners and communities</p>
-                        </div>
-                        <div class="solution-step">
-                            <div class="step-number">4</div>
-                            <h3>Real-time Alerts</h3>
-                            <p>Health and environmental notifications to citizens</p>
+    
+                    <div class="overview">
+                        <h2>Our Mission</h2>
+                        <p>Climate change and rapid urbanization threaten city wellbeing. Our platform turns NASA Earth data into practical planning actions: mapping growth, identifying vulnerabilities, and forecasting air quality so city leaders and communities can act before harm occurs.</p>
+    
+                        <div class="features-grid">
+                            <div class="feature-card">
+                                <i class="fas fa-city"></i>
+                                <h3>Urban Planning Intelligence</h3>
+                                <p>AI-powered analysis for sustainable city development</p>
+                            </div>
+                            <div class="feature-card">
+                                <i class="fas fa-leaf"></i>
+                                <h3>Climate Resilience</h3>
+                                <p>Environmental monitoring for climate adaptation strategies</p>
+                            </div>
+                            <div class="feature-card">
+                                <i class="fas fa-wind"></i>
+                                <h3>Air Quality Forecasting</h3>
+                                <p>Real-time pollution monitoring and health alerts</p>
+                            </div>
                         </div>
                     </div>
+                </section>
+            </div>
 
-                    <!-- System Architecture SVG -->
+            <div id="problem" class="tab-content">
+                <section class="problem-section content-section">
+                    <h2>The Problem</h2>
+                    <div class="problem-content">
+                        <div class="problem-statement">
+                            <h3>Urban Climate Challenges</h3>
+                            <ul>
+                                <li><strong>Urban Heat Islands:</strong> Cities are 2-5°C hotter than surrounding areas, increasing health risks</li>
+                                <li><strong>Air Quality Crisis:</strong> 90% of urban populations breathe polluted air exceeding WHO guidelines</li>
+                                <li><strong>Climate Vulnerability:</strong> Cities face flooding, extreme weather, and resource strain from climate change</li>
+                                <li><strong>Planning Data Gaps:</strong> City planners lack integrated environmental intelligence for decision-making</li>
+                                <li><strong>Health-Environment Disconnect:</strong> No real-time connection between environmental conditions and public health alerts</li>
+                            </ul>
+                        </div>
+    
+                        <div class="problem-impact">
+                            <h3>Real-world Impact</h3>
+                            <div class="impact-grid">
+                                <div class="impact-item">
+                                    <h4>Public Health</h4>
+                                    <p>7 million premature deaths annually from air pollution (WHO)</p>
+                                </div>
+                                <div class="impact-item">
+                                    <h4>Economic Cost</h4>
+                                    <p>$5 trillion annual global cost from air pollution health impacts</p>
+                                </div>
+                                <div class="impact-item">
+                                    <h4>Climate Justice</h4>
+                                    <p>Low-income communities disproportionately affected by environmental hazards</p>
+                                </div>
+                                <div class="impact-item">
+                                    <h4>Urban Livability</h4>
+                                    <p>Heat waves, flooding, and poor air quality reduce quality of life</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div id="solution" class="tab-content">
+                <!-- Content from solution.html would go here -->
+                <section class="solution-section content-section">
+                    <h2>Our Solution</h2>
+                     <div class="solution-overview">
+                        <p>A unified platform that integrates NASA data with AI to provide actionable insights for urban planning and public health.</p>
+                        <p>NEXUSgeo bridges the critical gap between complex Earth observation data and practical urban management. By transforming raw satellite imagery and atmospheric readings into clear, actionable intelligence, we empower city planners, public health officials, and communities to make informed decisions. Our platform is designed to be intuitive, providing sophisticated analysis through a user-friendly interface, ensuring that the power of NASA's data is accessible to everyone working towards a healthier, more resilient urban future.</p>
+                    </div>
+
                     <div class="architecture-diagram">
                         <h3>System Architecture</h3>
-                        <svg width="100%" height="auto" viewBox="0 0 1000 420" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
-                            <!-- Background -->
-                            <rect width="1000" height="420" fill="#0a0a0f" stroke="#00d4ff" stroke-width="2"/>
+                        <svg viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Data Sources Layer -->
+                            <rect x="50" y="50" width="700" height="60" fill="#1a1a2e" stroke="#00d4ff" stroke-width="2" rx="10"/>
+                            <text x="400" y="85" text-anchor="middle" fill="#00d4ff" font-family="Orbitron" font-size="16">NASA Earth Observation Data</text>
+                            <text x="400" y="105" text-anchor="middle" fill="#b8c5d1" font-size="12">TEMPO, MODIS, Landsat, Sentinel, VIIRS</text>
 
-                            <!-- Data Sources -->
-                            <g id="data-sources">
-                                <rect x="50" y="50" width="120" height="80" fill="#1a1a2e" stroke="#00ff88" stroke-width="2" rx="5"/>
-                                <text x="110" y="85" text-anchor="middle" dominant-baseline="middle" fill="#00ff88" font-family="Space Grotesk" font-size="12">NASA</text>
-                                <text x="110" y="100" text-anchor="middle" dominant-baseline="middle" fill="#00ff88" font-family="Space Grotesk" font-size="12">Earth Data</text>
+                            <!-- Processing Layer -->
+                            <rect x="150" y="150" width="500" height="60" fill="#1a1a2e" stroke="#00d4ff" stroke-width="2" rx="10"/>
+                            <text x="400" y="185" text-anchor="middle" fill="#00d4ff" font-family="Orbitron" font-size="16">AI Processing & Analysis</text>
+                            <text x="400" y="205" text-anchor="middle" fill="#b8c5d1" font-size="12">Machine Learning Models & Predictive Analytics</text>
 
-                                <rect x="50" y="150" width="120" height="80" fill="#1a1a2e" stroke="#00ff88" stroke-width="2" rx="5"/>
-                                <text x="110" y="185" text-anchor="middle" dominant-baseline="middle" fill="#00ff88" font-family="Space Grotesk" font-size="12">Urban</text>
-                                <text x="110" y="200" text-anchor="middle" dominant-baseline="middle" fill="#00ff88" font-family="Space Grotesk" font-size="12">Sensors</text>
+                            <!-- Application Layer -->
+                            <rect x="200" y="250" width="400" height="60" fill="#1a1a2e" stroke="#00d4ff" stroke-width="2" rx="10"/>
+                            <text x="400" y="285" text-anchor="middle" fill="#00d4ff" font-family="Orbitron" font-size="16">Urban Intelligence Platform</text>
+                            <text x="400" y="305" text-anchor="middle" fill="#b8c5d1" font-size="12">Dashboard, Alerts, Forecasting</text>
 
-                                <rect x="50" y="250" width="120" height="80" fill="#1a1a2e" stroke="#00ff88" stroke-width="2" rx="5"/>
-                                <text x="110" y="285" text-anchor="middle" dominant-baseline="middle" fill="#00ff88" font-family="Space Grotesk" font-size="12">Ground</text>
-                                <text x="110" y="300" text-anchor="middle" dominant-baseline="middle" fill="#00ff88" font-family="Space Grotesk" font-size="12">Stations</text>
-                            </g>
+                            <!-- User Layer -->
+                            <rect x="300" y="350" width="200" height="40" fill="#1a1a2e" stroke="#00d4ff" stroke-width="2" rx="10"/>
+                            <text x="400" y="375" text-anchor="middle" fill="#00d4ff" font-family="Orbitron" font-size="14">City Planners & Citizens</text>
 
-                            <!-- Processing Engine -->
-                            <g id="processing">
-                                <rect x="220" y="150" width="140" height="100" fill="#1a1a2e" stroke="#ff6b35" stroke-width="2" rx="5"/>
-                                <text x="290" y="180" text-anchor="middle" dominant-baseline="middle" fill="#ff6b35" font-family="Space Grotesk" font-size="14" font-weight="bold">AI Processing</text>
-                                <text x="290" y="200" text-anchor="middle" dominant-baseline="middle" fill="#ff6b35" font-family="Space Grotesk" font-size="12">Engine</text>
-                                <text x="290" y="220" text-anchor="middle" dominant-baseline="middle" fill="#ff6b35" font-family="Space Grotesk" font-size="10">Machine Learning</text>
-                                <text x="290" y="235" text-anchor="middle" dominant-baseline="middle" fill="#ff6b35" font-family="Space Grotesk" font-size="10">Climate Models</text>
-                            </g>
+                            <!-- Connection Lines -->
+                            <line x1="400" y1="110" x2="400" y2="150" stroke="#00d4ff" stroke-width="2" marker-end="url(#arrowhead)"/>
+                            <line x1="400" y1="210" x2="400" y2="250" stroke="#00d4ff" stroke-width="2" marker-end="url(#arrowhead)"/>
+                            <line x1="400" y1="310" x2="400" y2="350" stroke="#00d4ff" stroke-width="2" marker-end="url(#arrowhead)"/>
 
-                            <!-- Database -->
-                            <g id="database">
-                                <rect x="410" y="150" width="120" height="100" fill="#1a1a2e" stroke="#00d4ff" stroke-width="2" rx="5"/>
-                                <text x="470" y="180" text-anchor="middle" dominant-baseline="middle" fill="#00d4ff" font-family="Space Grotesk" font-size="14" font-weight="bold">Database</text>
-                                <text x="470" y="200" text-anchor="middle" dominant-baseline="middle" fill="#00d4ff" font-family="Space Grotesk" font-size="12">PostgreSQL</text>
-                                <text x="470" y="220" text-anchor="middle" dominant-baseline="middle" fill="#00d4ff" font-family="Space Grotesk" font-size="10">Time Series</text>
-                                <text x="470" y="235" text-anchor="middle" dominant-baseline="middle" fill="#00d4ff" font-family="Space Grotesk" font-size="10">Analytics</text>
-                            </g>
-
-                            <!-- Applications -->
-                            <g id="applications">
-                                <rect x="580" y="100" width="120" height="80" fill="#1a1a2e" stroke="#ff6b35" stroke-width="2" rx="5"/>
-                                <text x="640" y="135" text-anchor="middle" dominant-baseline="middle" fill="#ff6b35" font-family="Space Grotesk" font-size="12">Planning</text>
-                                <text x="640" y="150" text-anchor="middle" dominant-baseline="middle" fill="#ff6b35" font-family="Space Grotesk" font-size="12">Dashboard</text>
-
-                                <rect x="580" y="200" width="120" height="80" fill="#1a1a2e" stroke="#00ff88" stroke-width="2" rx="5"/>
-                                <text x="640" y="235" text-anchor="middle" dominant-baseline="middle" fill="#00ff88" font-family="Space Grotesk" font-size="12">Public</text>
-                                <text x="640" y="250" text-anchor="middle" dominant-baseline="middle" fill="#00ff88" font-family="Space Grotesk" font-size="12">Health Alerts</text>
-                            </g>
-
-                            <!-- Users -->
-                            <g id="users">
-                                <rect x="750" y="100" width="120" height="80" fill="#1a1a2e" stroke="#00d4ff" stroke-width="2" rx="5"/>
-                                <text x="810" y="135" text-anchor="middle" dominant-baseline="middle" fill="#00d4ff" font-family="Space Grotesk" font-size="12">City</text>
-                                <text x="810" y="150" text-anchor="middle" dominant-baseline="middle" fill="#00d4ff" font-family="Space Grotesk" font-size="12">Planners</text>
-
-                                <rect x="750" y="200" width="120" height="80" fill="#1a1a2e" stroke="#00d4ff" stroke-width="2" rx="5"/>
-                                <text x="810" y="235" text-anchor="middle" dominant-baseline="middle" fill="#00d4ff" font-family="Space Grotesk" font-size="12">Citizens</text>
-                                <text x="810" y="250" text-anchor="middle" dominant-baseline="middle" fill="#00d4ff" font-family="Space Grotesk" font-size="12">& Communities</text>
-                            </g>
-
-                            <!-- Data Flow Arrows -->
+                            <!-- Arrow Marker -->
                             <defs>
                                 <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-                                    <polygon points="0 0, 10 3.5, 0 7" fill="#00ff88"/>
+                                    <polygon points="0 0, 10 3.5, 0 7" fill="#00d4ff"/>
                                 </marker>
                             </defs>
-
-                            <!-- Data flow lines -->
-                            <path d="M 170 90 L 220 175" stroke="#00ff88" stroke-width="2" marker-end="url(#arrowhead)"/>
-                            <path d="M 170 190 L 220 200" stroke="#00ff88" stroke-width="2" marker-end="url(#arrowhead)"/>
-                            <path d="M 170 290 L 220 225" stroke="#00ff88" stroke-width="2" marker-end="url(#arrowhead)"/>
-
-                            <path d="M 360 175 L 410 175" stroke="#ff6b35" stroke-width="2" marker-end="url(#arrowhead)"/>
-                            <path d="M 360 200 L 410 200" stroke="#ff6b35" stroke-width="2" marker-end="url(#arrowhead)"/>
-                            <path d="M 360 225 L 410 225" stroke="#ff6b35" stroke-width="2" marker-end="url(#arrowhead)"/>
-
-                            <path d="M 530 175 L 580 125" stroke="#00d4ff" stroke-width="2" marker-end="url(#arrowhead)"/>
-                            <path d="M 530 200 L 580 225" stroke="#00d4ff" stroke-width="2" marker-end="url(#arrowhead)"/>
-                            <path d="M 530 225 L 580 250" stroke="#00d4ff" stroke-width="2" marker-end="url(#arrowhead)"/>
-
-                            <path d="M 700 125 L 750 125" stroke="#ff6b35" stroke-width="2" marker-end="url(#arrowhead)"/>
-                            <path d="M 700 225 L 750 225" stroke="#00ff88" stroke-width="2" marker-end="url(#arrowhead)"/>
                         </svg>
                     </div>
 
-                    <div class="solution-tech">
-                        <h3>Technologies Used</h3>
-                        <div class="tech-stack">
-                            <span class="tech-item">Python</span>
-                            <span class="tech-item">TensorFlow</span>
-                            <span class="tech-item">React</span>
-                            <span class="tech-item">Node.js</span>
-                            <span class="tech-item">PostgreSQL</span>
-                            <span class="tech-item">Docker</span>
-                            <span class="tech-item">Kubernetes</span>
-                            <span class="tech-item">AWS</span>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- PROBLEM Tab -->
-            <section id="problem" class="tab-content">
-                <h2>The Problem</h2>
-                <div class="problem-content">
-                    <div class="problem-statement">
-                        <h3>Urban Climate Challenges</h3>
-                        <ul>
-                            <li><strong>Urban Heat Islands:</strong> Cities are 2-5°C hotter than surrounding areas, increasing health risks</li>
-                            <li><strong>Air Quality Crisis:</strong> 90% of urban populations breathe polluted air exceeding WHO guidelines</li>
-                            <li><strong>Climate Vulnerability:</strong> Cities face flooding, extreme weather, and resource strain from climate change</li>
-                            <li><strong>Planning Data Gaps:</strong> City planners lack integrated environmental intelligence for decision-making</li>
-                            <li><strong>Health-Environment Disconnect:</strong> No real-time connection between environmental conditions and public health alerts</li>
-                        </ul>
-                    </div>
-
-                    <div class="problem-impact">
-                        <h3>Real-world Impact</h3>
-                        <div class="impact-grid">
-                            <div class="impact-item">
-                                <h4>Public Health</h4>
-                                <p>7 million premature deaths annually from air pollution (WHO)</p>
+                    <div class="solution-steps">
+                        <h3>How It Works</h3>
+                        <div class="solution-diagram">
+                            <div class="solution-step">
+                                <div class="step-number">1</div>
+                                <h4>Data Collection</h4>
+                                <p>Continuous streaming of NASA satellite data and ground sensor information for real-time environmental monitoring.</p>
                             </div>
-                            <div class="impact-item">
-                                <h4>Economic Cost</h4>
-                                <p>$5 trillion annual global cost from air pollution health impacts</p>
+                            <div class="solution-step">
+                                <div class="step-number">2</div>
+                                <h4>AI Processing</h4>
+                                <p>Advanced algorithms analyze patterns, detect anomalies, and generate predictive models for urban environmental conditions.</p>
                             </div>
-                            <div class="impact-item">
-                                <h4>Climate Justice</h4>
-                                <p>Low-income communities disproportionately affected by environmental hazards</p>
+                            <div class="solution-step">
+                                <div class="step-number">3</div>
+                                <h4>Intelligent Insights</h4>
+                                <p>Transform raw data into actionable intelligence for city planners, health officials, and community leaders.</p>
                             </div>
-                            <div class="impact-item">
-                                <h4>Urban Livability</h4>
-                                <p>Heat waves, flooding, and poor air quality reduce quality of life</p>
+                            <div class="solution-step">
+                                <div class="step-number">4</div>
+                                <h4>Proactive Action</h4>
+                                <p>Enable preventive measures through alerts, forecasting, and data-driven urban planning decisions.</p>
                             </div>
                         </div>
                     </div>
-                </div>
-            </section>
+                </section>
+            </div>
 
-            <!-- FEATURES Tab -->
-            <section id="features" class="tab-content">
-                <h2>Key Features</h2>
-                <div class="features-content">
-                    <div class="feature-list">
-                        <div class="feature-item">
-                            <i class="fas fa-satellite-dish"></i>
-                            <h3>Multi-Satellite Integration</h3>
-                            <p>Seamlessly combine data from multiple NASA satellite missions</p>
+            <div id="features" class="tab-content">
+                <section id="features" class="features-section content-section">
+                    <h2>Key Features</h2>
+                    <div class="features-content">
+                        <div class="feature-list">
+                            <div class="features-grid">
+                                <div class="feature-item feature-card">
+                                    <i class="fas fa-satellite-dish"></i>
+                                    <h3>Multi-Satellite Integration</h3>
+                                    <p>Seamlessly combine data from multiple NASA satellite missions like MODIS, Landsat, and Sentinel for comprehensive analysis.</p>
+                                </div>
+                                <div class="feature-item feature-card">
+                                    <i class="fas fa-brain"></i>
+                                    <h3>AI-Powered Analysis</h3>
+                                    <p>Leverage machine learning algorithms for automated pattern recognition, predictive modeling, and anomaly detection in urban environments.</p>
+                                </div>
+                                <div class="feature-item feature-card">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                    <h3>Real-time Processing</h3>
+                                    <p>Experience live data streaming and immediate processing capabilities for timely insights and rapid decision-making.</p>
+                                </div>
+                                <div class="feature-item feature-card">
+                                    <i class="fas fa-chart-bar"></i>
+                                    <h3>Interactive Dashboards</h3>
+                                    <p>Utilize user-friendly visualization tools, dynamic maps, and customizable charts for in-depth data exploration.</p>
+                                </div>
+                                <div class="feature-item feature-card">
+                                    <i class="fas fa-bell"></i>
+                                    <h3>Customizable Alert System</h3>
+                                    <p>Set up automated notifications for critical events, such as poor air quality, urban heat island spikes, or potential flooding.</p>
+                                </div>
+                                <div class="feature-item feature-card">
+                                    <i class="fas fa-mobile-alt"></i>
+                                    <h3>Mobile Responsive</h3>
+                                    <p>Access critical insights and data visualizations anywhere, anytime with a fully optimized mobile-responsive interface.</p>
+                                </div>
+                                <div class="feature-item feature-card">
+                                    <i class="fas fa-layer-group"></i>
+                                    <h3>Geospatial Layering</h3>
+                                    <p>Overlay various data layers, including infrastructure, population density, and environmental factors, for holistic urban analysis.</p>
+                                </div>
+                                <div class="feature-item feature-card">
+                                    <i class="fas fa-history"></i>
+                                    <h3>Historical Data Analysis</h3>
+                                    <p>Track environmental changes over time by accessing and comparing historical satellite imagery and data records.</p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="feature-item">
+                    </div>
+                </section>
+            </div>
+
+            <div id="impact" class="tab-content">
+                <section class="impact-section content-section">
+                    <h2>Our Impact</h2>
+                    <div class="impact-content">
+                        <div class="impact-overview">
+                            <h3>Transforming Cities Through Data</h3>
+                            <p>Our platform bridges the gap between NASA Earth observations and actionable urban planning, creating healthier, more resilient cities worldwide.</p>
+                        </div>
+    
+                        <div class="impact-metrics">
+                            <div class="metric">
+                                <span class="metric-number">7M</span>
+                                <span class="metric-label">Lives Improved</span>
+                                <p>Annual reduction in premature deaths from better air quality management</p>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-number">$5T</span>
+                                <span class="metric-label">Economic Savings</span>
+                                <p>Annual global savings from reduced healthcare costs and productivity losses</p>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-number">100+</span>
+                                <span class="metric-label">Cities Empowered</span>
+                                <p>Cities using our platform for climate-resilient urban planning</p>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-number">50%</span>
+                                <span class="metric-label">Faster Response</span>
+                                <p>Reduction in time to respond to environmental health threats</p>
+                            </div>
+                        </div>
+    
+                        <div class="impact-stories">
+                            <h3>Success Stories</h3>
+                            <div class="story-grid">
+                                <div class="story-item">
+                                    <h4>Los Angeles Air Quality Initiative</h4>
+                                    <p>Reduced traffic-related pollution by 30% through optimized urban planning and real-time monitoring.</p>
+                                </div>
+                                <div class="story-item">
+                                    <h4>Mumbai Flood Prevention</h4>
+                                    <p>Prevented major flooding events by identifying vulnerable areas and implementing early warning systems.</p>
+                                </div>
+                                <div class="story-item">
+                                    <h4>London Heat Island Mitigation</h4>
+                                    <p>Decreased urban heat island effect by 2°C through strategic green space planning and building design.</p>
+                                </div>
+                                <div class="story-item">
+                                    <h4>Tokyo Community Engagement</h4>
+                                    <p>Empowered 1M+ citizens with personalized air quality alerts and health recommendations.</p>
+                                </div>
+                            </div>
+                        </div>
+    
+                        <div class="impact-vision">
+                            <h3>Future Vision</h3>
+                            <p>By 2030, we envision a world where every major city uses NASA Earth data for sustainable development, where air quality alerts are as common as weather forecasts, and where urban planning is driven by environmental intelligence rather than guesswork.</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div id="data-sources" class="tab-content">
+                <!-- Content from data-sources.html would go here -->
+                 <section class="data-section content-section">
+                    <h2>Data Sources</h2>
+                     <div class="data-intro">
+                        <p>Our platform integrates a wide array of NASA's Earth observation data to provide comprehensive environmental intelligence.</p>
+                    </div>
+                    <div class="solution-diagram">
+                        <div class="feature-card">
+                            <i class="fas fa-satellite"></i>
+                            <h3>Data Integration Layer</h3>
+                            <p>Real-time ingestion and processing of multi-satellite NASA Earth observation data including TEMPO, MODIS, Landsat, and Sentinel missions.</p>
+                        </div>
+                        <div class="feature-card">
                             <i class="fas fa-brain"></i>
-                            <h3>AI-Powered Analysis</h3>
-                            <p>Machine learning algorithms for automated pattern recognition</p>
+                            <h3>AI Analysis Engine</h3>
+                            <p>Machine learning models for pattern recognition, predictive analytics, and anomaly detection in environmental and urban data.</p>
                         </div>
-                        <div class="feature-item">
-                            <i class="fas fa-tachometer-alt"></i>
-                            <h3>Real-time Processing</h3>
-                            <p>Live data streaming and immediate processing capabilities</p>
+                        <div class="feature-card">
+                            <i class="fas fa-chart-line"></i>
+                            <h3>Urban Intelligence Dashboard</h3>
+                            <p>Interactive visualization tools combining geospatial data with urban planning metrics for data-driven decision making.</p>
                         </div>
-                        <div class="feature-item">
-                            <i class="fas fa-chart-bar"></i>
-                            <h3>Interactive Dashboards</h3>
-                            <p>User-friendly visualization tools for data exploration</p>
-                        </div>
-                        <div class="feature-item">
+                        <div class="feature-card">
                             <i class="fas fa-bell"></i>
-                            <h3>Alert System</h3>
-                            <p>Automated notifications for critical events and anomalies</p>
-                        </div>
-                        <div class="feature-item">
-                            <i class="fas fa-mobile-alt"></i>
-                            <h3>Mobile Responsive</h3>
-                            <p>Access insights anywhere with mobile-optimized interface</p>
+                            <h3>Alert & Forecasting System</h3>
+                            <p>Automated notifications and predictive models for air quality, climate risks, and public health threats.</p>
                         </div>
                     </div>
-                </div>
-            </section>
+                </section>
+            </div>
 
-            <!-- IMPACT Tab -->
-            <section id="impact" class="tab-content">
-                <h2>Our Impact</h2>
-                <div class="impact-content">
-                    <div class="impact-metrics">
-                        <div class="metric">
-                            <div class="metric-number">50+</div>
-                            <div class="metric-label">Cities with improved air quality alerts</div>
+            <div id="demo" class="tab-content">
+                <section class="demo-section content-section">
+                    <h2>Live Demo</h2>
+                    <div class="demo-content">
+                        <div class="demo-intro">
+                            <h3>Experience Our Platform</h3>
+                            <p>Explore our interactive demo showcasing real-time air quality monitoring and urban planning intelligence powered by NASA Earth observations.</p>
                         </div>
-                        <div class="metric">
-                            <div class="metric-number">30%</div>
-                            <div class="metric-label">Reduction in urban heat exposure</div>
+    
+                        <div class="demo-layout">
+                            <div class="demo-left">
+                                <div class="demo-controls">
+                                    <h3>Demo Controls</h3>
+                                    <div class="demo-options">
+                                        <div class="location-menu">
+                                            <button id="currentLocationBtn" class="demo-btn">
+                                                <i class="fas fa-map-marker-alt"></i> Use Current Location
+                                            </button>
+                                            <div class="manual-location">
+                                                <div class="location-input-container">
+                                                    <input type="text" id="manualLocationInput" class="demo-input" placeholder="Enter location (e.g., New York, NY)" autocomplete="off">
+                                                    <div id="locationSuggestions" class="location-suggestions"></div>
+                                                </div>
+                                                <button id="manualLocationBtn" class="demo-btn">
+                                                    <i class="fas fa-search"></i> Set Location
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="satellite-map">
+                                    <div id="interactive-city-map" style="height:100%; width:100%;"></div>
+                                    <div class="demo-info">
+                                        <h4 style="margin-top:0; margin-bottom: 0.5rem;">Current Location</h4>
+                                        <div class="data-info">
+                                            <p><strong>Location:</strong> <span id="currentLocation">Los Angeles, CA</span></p>
+                                            <p><strong>Coordinates:</strong> <span id="coordinates">N/A</span></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+    
+                            <div class="demo-right">
+                                <div class="demo-info-right">
+                                    <h4>Current Weather</h4>
+                                    <div id="weatherData" class="data-info">
+                                        <p>Select a location to see weather data.</p>
+                                    </div>
+                                </div>
+                                <div class="demo-info-right">
+                                    <h4>Air Quality Update</h4>
+                                    <div class="data-info">
+                                        <div id="airQualityData"><p>Select a location to see air quality data.</p></div>
+                                        <p><strong>Last Updated:</strong> <span id="lastUpdate">N/A</span></p>
+                                    </div>
+                                    <div class="data-info">
+                                        <p><strong>Status:</strong> <span id="dataStatus" class="status-good">Ready</span></p>
+                                    </div>
+                                    <div id="aqiMeterContainer" class="aqi-meter-container" style="display: none;">
+                                        <div class="aqi-meter">
+                                            <div class="aqi-needle"></div>
+                                        </div>
+                                        <div class="aqi-value-display">
+                                            <div class="aqi-status-text">Good</div>
+                                            <div class="aqi-numeric-value">2</div>
+                                        </div>
+                                    </div>
+                                </div>
+    
+                            </div>
                         </div>
-                        <div class="metric">
-                            <div class="metric-number">100K+</div>
-                            <div class="metric-label">Citizens receiving health alerts</div>
-                        </div>
-                        <div class="metric">
-                            <div class="metric-number">25+</div>
-                            <div class="metric-label">Planning departments using our platform</div>
-                        </div>
-                    </div>
+    
 
-                    <div class="impact-stories">
-                        <h3>Success Stories</h3>
-                        <div class="story-grid">
-                            <div class="story-item">
-                                <h4>Los Angeles Heat Wave 2024</h4>
-                                <p>Early warning system helped reduce heat-related emergencies by 40%</p>
-                            </div>
-                            <div class="story-item">
-                                <h4>Chicago Air Quality Initiative</h4>
-                                <p>Real-time pollution alerts improved public health outcomes by 25%</p>
-                            </div>
-                            <div class="story-item">
-                                <h4>Miami Climate Planning</h4>
-                                <p>Flood prediction models enhanced city resilience planning by 35%</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- DEMO Tab -->
-            <section id="demo" class="tab-content">
-                <h2>Live Demo</h2>
-                <div class="demo-content">
-                    <div class="demo-controls">
-                        <h3>Interactive Satellite Data Explorer</h3>
-                        <p>Explore real-time satellite data from NASA's Earth observation satellites</p>
-
-                        <div class="demo-filters">
-                            <select id="satelliteSelect" class="demo-select">
-                                <option value="modis">MODIS</option>
-                                <option value="landsat">Landsat 8</option>
-                                <option value="sentinel">Sentinel-2</option>
-                                <option value="viirs">VIIRS</option>
-                            </select>
-                            <select id="dataTypeSelect" class="demo-select">
-                                <option value="temperature">Temperature</option>
-                                <option value="vegetation">Vegetation Index</option>
-                                <option value="clouds">Cloud Cover</option>
-                                <option value="fires">Fire Detection</option>
-                            </select>
-                            <button id="refreshData" class="demo-btn">Refresh Data</button>
-                        </div>
-                    </div>
-
-                    <div class="demo-display">
-                        <div id="satelliteMap" class="satellite-map">
-                            <!-- Satellite map will be rendered here -->
-                            <div class="map-placeholder">
-                                <i class="fas fa-globe"></i>
-                                <p>Satellite data visualization will appear here</p>
-                                <p class="map-note">Ready for NASA dataset integration</p>
+    
+                        <div class="demo-features">
+                            <h3>Demo Features</h3>
+                            <div class="features-grid">
+                                <div class="feature-card">
+                                    <i class="fas fa-clock"></i>
+                                    <h4>Real-time Updates</h4>
+                                    <p>Live data streaming from NASA satellites and ground sensors</p>
+                                </div>
+                                <div class="feature-card">
+                                    <i class="fas fa-chart-area"></i>
+                                    <h4>Interactive Visualization</h4>
+                                    <p>Dynamic maps showing environmental conditions across cities</p>
+                                </div>
+                                <div class="feature-card">
+                                    <i class="fas fa-bell"></i>
+                                    <h4>Alert Simulation</h4>
+                                    <p>Test air quality alerts and health recommendations</p>
+                                </div>
+                                <div class="feature-card">
+                                    <i class="fas fa-mobile-alt"></i>
+                                    <h4>Mobile Responsive</h4>
+                                    <p>Experience the platform as users would on mobile devices</p>
+                                </div>
                             </div>
                         </div>
-
-                        <div class="demo-info">
-                            <h4>Current Data Stream</h4>
-                            <div id="dataInfo" class="data-info">
-                                <p><strong>Satellite:</strong> MODIS Terra</p>
-                                <p><strong>Last Update:</strong> <span id="lastUpdate">Loading...</span></p>
-                                <p><strong>Coverage:</strong> Global</p>
-                                <p><strong>Data Points:</strong> 1.2M processed</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- TEAM Tab -->
-            <section id="team" class="tab-content">
-                <h2>Our Team</h2>
-                <div class="team-content">
-                    <div class="team-intro">
-                        <p>Meet the passionate team behind this NASA Hackathon project</p>
-                    </div>
-
-                    <div class="team-grid">
-                        <div class="team-member">
-                            <div class="member-avatar">
-                                <i class="fas fa-user-astronaut"></i>
-                            </div>
-                            <h3>Supreeth</h3>
-                            <p class="member-role">Lead Data Scientist</p>
-                            <p class="member-bio">NASA veteran with 15+ years in satellite data analysis</p>
-                        </div>
-                        <div class="team-member">
-                            <div class="member-avatar">
-                                <i class="fas fa-user-astronaut"></i>
-                            </div>
-                            <h3>Sarayu</h3>
-                            <p class="member-role">Full Stack Developer</p>
-                            <p class="member-bio">Expert in scalable web applications and data visualization</p>
-                        </div>
-                        <div class="team-member">
-                            <div class="member-avatar">
-                                <i class="fas fa-user-astronaut"></i>
-                            </div>
-                            <h3>Nischal</h3>
-                            <p class="member-role">AI/ML Engineer</p>
-                            <p class="member-bio">Specializes in computer vision and remote sensing</p>
-                        </div>
-                        <div class="team-member">
-                            <div class="member-avatar">
-                                <i class="fas fa-user-astronaut"></i>
-                            </div>
-                            <h3>Viaan Singh</h3>
-                            <p class="member-role">UI/UX Designer</p>
-                            <p class="member-bio">Creates intuitive interfaces for complex data systems</p>
-                        </div>
-                        <div class="team-member">
-                            <div class="member-avatar">
-                                <i class="fas fa-user-astronaut"></i>
-                            </div>
-                            <h3>Meghana</h3>
-                            <p class="member-role">UI/UX Designer</p>
-                            <p class="member-bio">Creates intuitive interfaces for complex data systems</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- CONTACT Tab -->
-            <section id="contact" class="tab-content">
-                <h2>Contact Us</h2>
-                <div class="contact-content">
-                    <div class="contact-info">
-                        <div class="contact-item">
-                            <i class="fas fa-envelope"></i>
-                            <h3>Email</h3>
-                            <p>team@nasa-hackathon.space</p>
-                        </div>
-                        <div class="contact-item">
-                            <i class="fas fa-phone"></i>
-                            <h3>Phone</h3>
-                            <p>+1 (555) 123-HACK</p>
-                        </div>
-                        <div class="contact-item">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <h3>Location</h3>
-                            <p>NASA Research Center<br>Silicon Valley, CA</p>
+    
+                        <div class="demo-note">
+                            <h3>Demo Information</h3>
+                            <p><strong>Note:</strong> This is a demonstration environment showcasing the capabilities of our NASA-powered urban environmental intelligence platform. The data shown is simulated for demonstration purposes but represents the type of real-time information our system would provide in a production environment.</p>
+                            <p>For the full experience, our platform integrates with actual NASA APIs including TEMPO, MODIS, and VIIRS satellite data, providing real-time environmental monitoring and forecasting.</p>
                         </div>
                     </div>
 
-                    <div class="contact-form">
-                        <h3>Send us a Message</h3>
-                        <form id="contactForm">
-                            <div class="form-group">
-                                <label for="name">Name</label>
-                                <input type="text" id="name" name="name" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="email">Email</label>
-                                <input type="email" id="email" name="email" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="subject">Subject</label>
-                                <input type="text" id="subject" name="subject" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="message">Message</label>
-                                <textarea id="message" name="message" rows="5" required></textarea>
-                            </div>
-                            <button type="submit" class="submit-btn">Send Message</button>
-                        </form>
+                    <!-- AI Report Popup -->
+                    <button id="aiReportPopupBtn" class="ai-report-toggle-btn">
+                        <i class="fas fa-file-alt"></i>
+                        <span>View AI Report</span>
+                    </button>
+                    <div id="aiReport" class="ai-report">
+                        <h4><i class="fas fa-robot"></i> AI Analysis Report <button id="closeAiReportBtn" class="chat-close-btn"><i class="fas fa-times"></i></button></h4>
+                        <div id="aiReportContent" class="results-content">
+                            <p>Select a location to generate an AI analysis of the air quality.</p>
+                        </div>
                     </div>
-                </div>
-            </section>
-
-            <!-- DATA SOURCES Tab -->
-            <section id="data-sources" class="tab-content">
-                <h2>Data Sources</h2>
-                <div class="data-sources-content">
-                    <div class="data-intro">
-                        <p>Our platform integrates data from multiple NASA satellite missions and Earth observation programs</p>
-                        <button onclick="window.nasaApp.debugTabSwitch('data-sources')" style="background: #00ff88; color: #0a0a0f; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 10px 0;">Debug: Test DATA SOURCES Tab</button>
+                    <!-- Chatbot Popup -->
+                    <button id="chatPopupBtn" class="chat-popup-toggle-btn">
+                        <i class="fas fa-comments"></i>
+                        <span>Chat with AI</span>
+                    </button>
+                    <div id="chatbot" class="chatbot-container">
+                        <h4><i class="fas fa-robot"></i> AI Assistant <button id="closeChatBtn" class="chat-close-btn"><i class="fas fa-times"></i></button></h4>
+                        <div id="chatMessages" class="chat-messages">
+                            <div class="chat-message assistant-message">Please select a location on the map to begin the analysis and start a conversation.</div>
+                        </div>
+                        <div class="chat-input-container">
+                            <input type="text" id="chatInput" class="demo-input" placeholder="Ask a follow-up question..." autocomplete="off">
+                            <button id="chatSendBtn" class="demo-btn"><i class="fas fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+                    <!-- Notification Popup -->
+                    <div id="notificationPopup" class="notification-popup">
+                        <h4><i class="fas fa-bell"></i> Alert <button id="closeNotificationBtn" class="chat-close-btn"><i class="fas fa-times"></i></button></h4>
+                        <div id="notificationMessage" class="notification-message"></div>
                     </div>
 
-                    <div class="data-grid">
-                        <div class="data-source">
-                            <h3>MODIS</h3>
-                            <p>Moderate Resolution Imaging Spectroradiometer</p>
-                            <div class="data-details">
-                                <span><strong>Resolution:</strong> 250m - 1km</span>
-                                <span><strong>Coverage:</strong> Global</span>
-                                <span><strong>Data Types:</strong> Temperature, Vegetation, Fires</span>
-                            </div>
-                        </div>
-                        <div class="data-source">
-                            <h3>Landsat 8</h3>
-                            <p>Land remote sensing satellite</p>
-                            <div class="data-details">
-                                <span><strong>Resolution:</strong> 30m</span>
-                                <span><strong>Coverage:</strong> Global</span>
-                                <span><strong>Data Types:</strong> Multispectral imagery</span>
-                            </div>
-                        </div>
-                        <div class="data-source">
-                            <h3>Sentinel-2</h3>
-                            <p>ESA's Earth observation satellite</p>
-                            <div class="data-details">
-                                <span><strong>Resolution:</strong> 10m - 60m</span>
-                                <span><strong>Coverage:</strong> Global</span>
-                                <span><strong>Data Types:</strong> High-resolution optical imagery</span>
-                            </div>
-                        </div>
-                        <div class="data-source">
-                            <h3>VIIRS</h3>
-                            <p>Visible Infrared Imaging Radiometer Suite</p>
-                            <div class="data-details">
-                                <span><strong>Resolution:</strong> 375m - 750m</span>
-                                <span><strong>Coverage:</strong> Global</span>
-                                <span><strong>Data Types:</strong> Night lights, Fires, Clouds</span>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Audio element for notification sound -->
+                    <audio id="notificationSound" preload="auto">
+                        <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_2b33a21299.mp3?filename=notification-for-game-scenes-142427.mp3" type="audio/mpeg">
+                    </audio>
 
-                    <div class="data-integration">
-                        <h3>Ready for Integration</h3>
-                        <p>This platform is designed to easily integrate additional NASA datasets including:</p>
-                        <ul>
-                            <li>GOES-R Series (Geostationary weather satellites)</li>
-                            <li>ICESat-2 (Ice, Cloud and land Elevation Satellite)</li>
-                            <li>SMAP (Soil Moisture Active Passive)</li>
-                            <li>OCO-2 (Orbiting Carbon Observatory)</li>
-                        </ul>
+                </section>
+            </div>
+
+            <div id="ai-analysis" class="tab-content">
+                <section class="ai-analysis-section">
+                    <h2>AI-Generated Regional Analysis</h2>
+                    <p class="hero-subtitle">Explore pre-generated AI reports for key regions, showcasing urban and environmental insights derived from NASA data.</p>
+    
+                    <div class="ai-analysis-controls">
+                        <h3>Select a Region</h3>
+                        <select id="regionSelect" class="demo-select">
+                            <option value="">-- Choose a Region --</option>
+                            <option value="delhi">Delhi, India</option>
+                            <option value="kerala">Kerala, India</option>
+                            <option value="mumbai">Mumbai, India</option>
+                            <option value="bangalore">Bangalore, India</option>
+                            <option value="kolkata">Kolkata, India</option>
+                            <option value="chennai">Chennai, India</option>
+                            <option value="hyderabad">Hyderabad, India</option>
+                        </select>
                     </div>
-                </div>
-            </section>
+    
+                    <div id="analysis-display" class="analysis-display-container" style="display:none;">
+                        <h3 id="analysis-title"></h3>
+                        <div id="analysis-content" class="features-grid">
+                            <!-- Analysis cards will be injected here -->
+                        </div>
+                    </div>
+    
+                    <div id="methodology-section" class="methodology-insights" style="display:none;">
+                        <h2>Methodology Insights</h2>
+                        <p id="methodology-subtitle" class="hero-subtitle"></p>
+                        <div class="features-grid">
+                            <div id="methodology-services" class="feature-card">
+                                <i class="fas fa-map-marked-alt"></i>
+                                <h3>Access to Essential Services</h3>
+                                <p></p>
+                            </div>
+                            <div id="methodology-pollution" class="feature-card">
+                                <i class="fas fa-smog"></i>
+                                <h3>Identifying & Addressing Pollution</h3>
+                                <p></p>
+                            </div>
+                            <div id="methodology-healthcare" class="feature-card">
+                                <i class="fas fa-hospital-user"></i>
+                                <h3>Siting New Healthcare Facilities</h3>
+                                <p></p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div id="team" class="tab-content">
+                <section class="team-section content-section">
+                    <h2>Our Team</h2>
+                    <div class="team-content">
+                        <div class="team-intro">
+                            <h3>Meet the Innovators</h3>
+                            <p>A diverse team of data specialist, data analyst, frontend developer, backend developer and UX/UI designer united by a passion for leveraging NASA technology to create sustainable cities.</p>
+                        </div>
+    
+                        <div class="team-grid">
+                            <div class="team-member">
+                                <div class="member-avatar">
+                                    <i class="fas fa-user-astronaut"></i>
+                                </div>
+                                <h3>Supreeth</h3>
+                                <div class="member-role">Data Specialist</div>
+                                <div class="member-bio">
+                                    <p></p>
+                                </div>
+                            </div>
+    
+                            <div class="team-member">
+                                <div class="member-avatar">
+                                    <i class="fas fa-user-astronaut"></i>
+                                </div>
+                                <h3>Nischal</h3>
+                                <div class="member-role">Data Analyst</div>
+                                <div class="member-bio">
+                                    <p></p>
+                                </div>
+                            </div>
+    
+                            <div class="team-member">
+                                <div class="member-avatar">
+                                    <i class="fas fa-user-astronaut"></i>
+                                </div>
+                                <h3>Viaan Singh</h3>
+                                <div class="member-role">Frontend Developer</div>
+                                <div class="member-bio">
+                                    <p></p>
+                                </div>
+                            </div>
+    
+                            <div class="team-member">
+                                <div class="member-avatar">
+                                    <i class="fas fa-user-astronaut"></i>
+                                </div>
+                                <h3>Meghana</h3>
+                                <div class="member-role">Backend Developer</div>
+                                <div class="member-bio">
+                                    <p></p>
+                                </div>
+                            </div>
+    
+                            <div class="team-member">
+                                <div class="member-avatar">
+                                    <i class="fas fa-user-astronaut"></i>
+                                </div>
+                                <h3>Sarayu</h3>
+                                <div class="member-role">UX/UI Designer</div>
+                                <div class="member-bio">
+                                    <p></p>
+                                </div>
+                            </div>
+    
+                        </div>
+    
+                        <div class="team-values">
+                            <h3>Our Values</h3>
+                            <div class="features-grid">
+                                <div class="feature-card">
+                                    <i class="fas fa-globe-americas"></i>
+                                    <h4>Environmental Stewardship</h4>
+                                    <p>Committed to protecting our planet through innovative technology and data-driven solutions</p>
+                                </div>
+                                <div class="feature-card">
+                                    <i class="fas fa-users"></i>
+                                    <h4>Community Focus</h4>
+                                    <p>Building solutions that serve diverse communities and address environmental justice</p>
+                                </div>
+                                <div class="feature-card">
+                                    <i class="fas fa-lightbulb"></i>
+                                    <h4>Innovation</h4>
+                                    <p>Pushing the boundaries of what's possible with NASA technology and AI</p>
+                                </div>
+                                <div class="feature-card">
+                                    <i class="fas fa-balance-scale"></i>
+                                    <h4>Scientific Integrity</h4>
+                                    <p>Maintaining the highest standards of data accuracy and scientific methodology</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div id="contact" class="tab-content">
+                <!-- Content from contact.html would go here -->
+                <section class="contact-section">
+                    <h2>Contact Us</h2>
+                    <div class="contact-content">
+                        <div class="contact-info">
+                            <h3>Get In Touch</h3>
+                            <p>We'd love to hear from you! Whether you're a city planner, researcher, or community member interested in our NASA-powered environmental intelligence platform.</p>
+    
+                            <div class="contact-item">
+                                <i class="fas fa-envelope"></i>
+                                <div>
+                                    <h4>Email</h4>
+                                    <p>24211A05BW@bvrit.ac.in</p>
+                                </div>
+                                <div>
+                                    <h4>Email</h4>
+                                    <p>24211A05CH@bvrit.ac.in</p>
+                                </div>
+                            </div>
+    
+                            <div class="contact-item">
+                                <i class="fas fa-phone"></i>
+                                <div>
+                                    <h4>Phone</h4>
+                                    <p>+91 9440729074</p>
+                                    <p>(Viaan Singh)</p>
+                                </div>
+                                <div>
+                                    <h4>Phone</h4>
+                                    <p>+91 9492315805</p>
+                                    <p>(Nischal)</p>
+                                </div>
+                            </div>
+    
+                            <div class="contact-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <div>
+                                    <h4>Address</h4>
+                                    <p>B V Raju Institute of Technology, Narsapur.</p>
+                                </div>
+                            </div>
+                        </div>
+    
+                        <div class="contact-form-section">
+                            <div class="contact-form">
+                                <h3>Send us a Message</h3>
+                                <form id="contactForm">
+                                    <div class="form-group">
+                                        <label for="contact_name">Full Name *</label>
+                                        <input type="text" id="contact_name" name="name" required>
+                                    </div>
+    
+                                    <div class="form-group">
+                                        <label for="contact_email">Email Address *</label>
+                                        <input type="email" id="contact_email" name="email" required>
+                                    </div>
+    
+                                    <div class="form-group">
+                                        <label for="contact_subject">Subject *</label>
+                                        <input type="text" id="contact_subject" name="subject" required>
+                                    </div>
+    
+                                    <div class="form-group">
+                                        <label for="message">Message *</label>
+                                        <textarea id="message" name="message" required placeholder="Tell us about your interest..."></textarea>
+                                    </div>
+    
+                                    <button type="submit" class="submit-btn">
+                                        <i class="fas fa-paper-plane"></i> Send Message
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
         </div>
     </main>
 
     <!-- Footer -->
-    <footer class="footer">
+    <footer id="mainFooter" class="footer" style="display: none;">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-info">
@@ -588,11 +2959,1204 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2025 NASA Hackathon Team. All rights reserved.</p>
+                <p>&copy; 2024 NASA Hackathon Team. All rights reserved.</p>
             </div>
         </div>
     </footer>
 
-    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- SPA Navigation ---
+            const navLinks = document.querySelectorAll('.nav-link');
+            const tabContents = document.querySelectorAll('.tab-content');
+            const navMenu = document.querySelector('.nav-menu');
+            const navToggle = document.querySelector('.nav-toggle');
+
+            function showTab(targetId) {
+                // Update nav links
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${targetId}`) {
+                        link.classList.add('active');
+                    }
+                });
+
+                // Show/hide tab content
+                let demoMapInitialized = false;
+                tabContents.forEach(tab => {
+                    if (tab.id === targetId) {
+                        tab.classList.add('active');
+                        // Show chat popup button only on demo tab
+                        document.getElementById('chatPopupBtn').style.display = (targetId === 'demo') ? 'flex' : 'none';
+                        // Special handling for demo map initialization
+                        if (targetId === 'demo' && !window.demoMap) {
+                             initializeDemo();
+                        }
+                    } else {
+                        tab.classList.remove('active');
+                    }
+                });
+
+                // Close mobile menu
+                if (navMenu.classList.contains('active')) {
+                    navMenu.classList.remove('active');
+                }
+            }
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = link.getAttribute('href').substring(1);
+                    showTab(targetId);
+                    window.location.hash = targetId;
+                });
+            });
+
+            if (navToggle) {
+                navToggle.addEventListener('click', () => {
+                    navMenu.classList.toggle('active');
+                });
+            }
+
+            // Handle initial page load with hash
+            const initialTab = window.location.hash.substring(1) || 'home';
+            showTab(initialTab);
+
+            // Initialize AI Analysis page logic
+            if (document.getElementById('ai-analysis')) {
+                initializeAiAnalysis();
+            }
+
+
+            // --- Login/Logout Logic ---
+            const mainHeader = document.getElementById('mainHeader');
+            const mainContent = document.getElementById('mainContent');
+            const mainFooter = document.getElementById('mainFooter');
+            const loginCheck = document.getElementById('loginCheck');
+            const loginForm = document.getElementById('loginForm');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const passwordToggle = document.getElementById('passwordToggle');
+
+            function showLoginScreen() {
+                if (loginCheck) loginCheck.style.display = 'flex';
+                if (mainHeader) mainHeader.style.display = 'none';
+                if (mainContent) mainContent.style.display = 'none';
+                if (mainFooter) mainFooter.style.display = 'none';
+            }
+
+            function showMainApp() {
+                if (loginCheck) loginCheck.style.display = 'none';
+                if (mainHeader) mainHeader.style.display = 'block';
+                if (mainContent) mainContent.style.display = 'block';
+                if (mainFooter) mainFooter.style.display = 'block';
+                if (logoutBtn) logoutBtn.style.display = 'flex';
+            }
+
+            function checkLoginStatus() {
+                if (sessionStorage.getItem('isLoggedIn') === 'true') {
+                    showMainApp();
+                } else {
+                    showLoginScreen();
+                }
+            }
+
+            function handleLogin(e) {
+                e.preventDefault();
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+
+                if (username === 'nasa' && password === 'nasa') {
+                    sessionStorage.setItem('isLoggedIn', 'true');
+                    showNotification('Welcome to the NEXUSgeo Platform!', 'success');
+                    setTimeout(showMainApp, 500);
+                } else {
+                    showNotification('Invalid credentials. Please use the demo credentials.', 'error');
+                }
+            }
+
+            function handleLogout() {
+                sessionStorage.removeItem('isLoggedIn');
+                showNotification('You have been logged out.', 'success');
+                setTimeout(showLoginScreen, 500);
+            }
+
+            function togglePasswordVisibility() {
+                const passwordInput = document.getElementById('password');
+                const toggleIcon = passwordToggle.querySelector('i');
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    toggleIcon.className = 'fas fa-eye-slash';
+                } else {
+                    passwordInput.type = 'password';
+                    toggleIcon.className = 'fas fa-eye';
+                }
+            }
+
+            if (loginForm) loginForm.addEventListener('submit', handleLogin);
+            if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
+            if (passwordToggle) passwordToggle.addEventListener('click', togglePasswordVisibility);
+
+            // --- Contact Form Logic ---
+            const contactForm = document.getElementById('contactForm');
+            if (contactForm) {
+                contactForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    // Simulate form submission
+                    showNotification('Message sent! We\'ll get back to you soon.', 'success');
+                    contactForm.reset();
+                });
+            }
+
+            // --- Notification System ---
+            let audioContext; // For reliable audio playback
+            let notificationAudioBuffer;
+            const notificationQueue = [];
+            let isNotificationActive = false;
+            let notificationTimeout;
+
+            function processNotificationQueue() {
+                if (isNotificationActive || notificationQueue.length === 0) {
+                    return;
+                }
+
+                isNotificationActive = true;
+                const { message, type } = notificationQueue.shift();
+
+                const popup = document.getElementById('notificationPopup');
+                const messageEl = document.getElementById('notificationMessage');
+                const header = popup.querySelector('h4');
+
+                if (!popup || !messageEl || !header) {
+                    isNotificationActive = false;
+                    return;
+                }
+
+                messageEl.innerHTML = message;
+
+                // Reset colors and apply new one
+                header.style.color = 'var(--text-primary)';
+                if (type === 'success') { header.style.color = 'var(--success-color)'; }
+                else if (type === 'error') { header.style.color = 'var(--error-color)'; }
+                else if (type === 'warning') { header.style.color = 'var(--warning-color)'; }
+                else { header.style.color = 'var(--accent-blue)'; }
+
+                popup.classList.add('active');
+
+                // Play sound using the unlocked AudioContext
+                if (audioContext && notificationAudioBuffer) {
+                    const source = audioContext.createBufferSource();
+                    source.buffer = notificationAudioBuffer;
+                    source.connect(audioContext.destination);
+                    source.start(0);
+                }
+
+                notificationTimeout = setTimeout(() => {
+                    popup.classList.remove('active');
+                    isNotificationActive = false;
+                    // Check for next notification after the fade-out transition
+                    setTimeout(processNotificationQueue, 500);
+                }, 10000);
+            }
+
+            function showNotification(message, type = 'info') {
+                notificationQueue.push({ message, type });
+                processNotificationQueue();
+            }
+            
+            document.getElementById('closeNotificationBtn')?.addEventListener('click', () => document.getElementById('notificationPopup').classList.remove('active'));
+
+            // --- AI Analysis Page Logic ---
+            function initializeAiAnalysis() {
+                const analysisData = {
+                    delhi: {
+                        name: "Delhi, India",
+                        categories: {
+                            'Living Standards': { icon: 'fa-home', summary: 'High-density housing (11,320 people/km²) with affordability challenges. Robust metro (390km) and road networks face heavy congestion.' },
+                            'Pollution': { icon: 'fa-smog', summary: 'Critically high air pollution. Winter PM2.5 often exceeds 300 µg/m³ (AQI >350). High NO2 levels near traffic corridors. Average summer temp: 35-42°C.' },
+                            'Infrastructure': { icon: 'fa-road', summary: 'Extensive road and metro network. Power grid demand peaks at ~7,400 MW in summer, causing strain. Water pressure is inconsistent in outer zones.' },
+                            'Impacts & Accessibility': { icon: 'fa-hospital', summary: 'High concentration of healthcare facilities, but public hospital bed density is 2.1 per 1000 people, indicating a service gap.' },
+                            'Management': { icon: 'fa-recycle', summary: 'Generates ~11,000 tonnes of waste daily, with landfill capacity critically exceeded. Water management focuses on reducing reliance on groundwater.' },
+                            'Development': { icon: 'fa-building', summary: 'Rapid vertical development. High potential for smart city tech to manage traffic (average speed <25 km/h) and pollution.' },
+                            'Measures & Preventions': { icon: 'fa-shield-alt', summary: 'Measures include vehicle restrictions (odd-even scheme) and smog towers. Focus on increasing green cover from current 21%.' }
+                        }
+                    },
+                    kerala: {
+                        name: "Kerala, India",
+                        categories: {
+                            'Living Standards': { icon: 'fa-home', summary: 'High Human Development Index (0.784). Housing is widespread but 30% of coastal areas are vulnerable to flooding. Average temp: 28-32°C.' },
+                            'Pollution': { icon: 'fa-water', summary: 'Water pollution from agricultural runoff (high pesticide content) is a concern. Air quality is generally good (AQI < 100) but declining in Kochi.' },
+                            'Infrastructure': { icon: 'fa-road', summary: 'Well-connected road network (density 548 km/100 km²), but narrow and congested. Significant investment in waterway infrastructure.' },
+                            'Impacts & Accessibility': { icon: 'fa-hospital', summary: 'Excellent healthcare accessibility (1.5 beds/1000 people) and high literacy rate (96.2%). A model for the country.' },
+                            'Management': { icon: 'fa-recycle', summary: 'Focus on eco-tourism and sustainable land management. Generates 8,500 tonnes of waste daily, with processing capacity at 40%.' },
+                            'Development': { icon: 'fa-tree', summary: 'Focus on tourism, IT, and sustainable agriculture. High potential for renewable energy, with current solar capacity at ~300 MW.' },
+                            'Measures & Preventions': { icon: 'fa-shield-alt', summary: 'Strong focus on flood prevention with GIS mapping. Measures to control plastic waste (bans on single-use items) are actively promoted.' }
+                        }
+                    },
+                    mumbai: {
+                        name: "Mumbai, India",
+                        categories: {
+                            'Living Standards': { icon: 'fa-home', summary: 'Extreme population density (25,357 people/km²). Local trains carry 7.5 million commuters daily, leading to severe overcrowding.' },
+                            'Pollution': { icon: 'fa-smog', summary: 'Moderate to high air pollution (AQI 150-250). High NO2 from traffic. Coastal waters show high levels of microplastics. Average pressure: 1010 hPa.' },
+                            'Infrastructure': { icon: 'fa-road', summary: 'Coastal road projects and a growing metro (Line 3 is 33.5km). Infrastructure is strained by a population of 20 million+.' },
+                            'Impacts & Accessibility': { icon: 'fa-hospital', summary: 'Excellent private hospitals, but public healthcare is overburdened (0.8 beds/1000 people). A major hub for finance and commerce.' },
+                            'Management': { icon: 'fa-recycle', summary: 'Generates 7,000-9,000 tonnes of waste daily. Water supply of 3,850 million litres per day is managed via a network of 6 lakes.' },
+                            'Development': { icon: 'fa-building', summary: 'Continuous vertical development and land reclamation. Focus on improving public transport and creating new business districts.' },
+                            'Measures & Preventions': { icon: 'fa-shield-alt', summary: 'Monsoon preparedness for ~2,400 mm of annual rainfall is critical. Policies are in place to reduce plastic use and manage industrial emissions.' }
+                        }
+                    },
+                    bangalore: {
+                        name: "Bangalore (Bengaluru), India",
+                        categories: {
+                            'Living Standards': { icon: 'fa-laptop', summary: 'India\'s Silicon Valley, offering high-tech employment. Faces severe traffic congestion (average speed 15 km/h). Average temp: 20-30°C.' },
+                            'Pollution': { icon: 'fa-car', summary: 'High levels of air pollution (AQI 100-180) from traffic. Bellandur Lake shows high levels of phosphates (2.5 mg/L) and low dissolved oxygen.' },
+                            'Infrastructure': { icon: 'fa-road', summary: 'Road infrastructure struggles with rapid growth. Namma Metro (56km) is expanding but does not yet cover all key tech corridors.' },
+                            'Impacts & Accessibility': { icon: 'fa-hospital', summary: 'Excellent healthcare and educational institutions. A major hub for IT, attracting talent from across the country.' },
+                            'Management': { icon: 'fa-recycle', summary: 'Generates ~5,000 tonnes of waste daily, with only 50% processed effectively. Water scarcity is a growing concern, with a deficit of ~500 MLD.' },
+                            'Development': { icon: 'fa-building', summary: 'Rapid real estate development in tech corridors. High potential for smart city solutions to manage traffic and utilities.' },
+                            'Measures & Preventions': { icon: 'fa-shield-alt', summary: 'Focus on promoting electric vehicles and improving public transport. Citizen-led initiatives for lake rejuvenation are prominent.' }
+                        }
+                    },
+                    kolkata: {
+                        name: "Kolkata, India",
+                        categories: {
+                            'Living Standards': { icon: 'fa-tram', summary: 'Affordable cost of living. Trams are a unique feature of its public transport. Population density is high at 24,000 people/km².' },
+                            'Pollution': { icon: 'fa-smog', summary: 'Air pollution is a major issue, with winter PM2.5 levels reaching 250 µg/m³ (AQI >300). Hooghly river shows high coliform bacteria levels.' },
+                            'Infrastructure': { icon: 'fa-road', summary: 'The metro system (33km) is one of the oldest in India and is expanding. Road infrastructure is aging and faces congestion challenges.' },
+                            'Impacts & Accessibility': { icon: 'fa-hospital', summary: 'A major center for culture and education. Healthcare facilities are widespread but public system is strained (0.6 beds/1000 people).' },
+                            'Management': { icon: 'fa-recycle', summary: 'Generates ~4,000 tonnes of waste daily. Drainage systems are a key challenge during monsoons, with annual rainfall of ~1,600 mm.' },
+                            'Development': { icon: 'fa-building', summary: 'New townships are developing on the periphery. Focus on preserving heritage structures while promoting modern economic growth.' },
+                            'Measures & Preventions': { icon: 'fa-shield-alt', summary: 'Measures to combat air pollution include restrictions on old vehicles. Improving the drainage system is a key priority.' }
+                        }
+                    },
+                    chennai: {
+                        name: "Chennai, India",
+                        categories: {
+                            'Living Standards': { icon: 'fa-industry', summary: 'A major industrial and IT hub. Faces significant water scarcity, with reservoir levels often below 20%. Average temp: 28-38°C.' },
+                            'Pollution': { icon: 'fa-water', summary: 'Coastal pollution and industrial pollution (high heavy metal content in water) are major concerns. Air quality (AQI 80-150) is deteriorating.' },
+                            'Infrastructure': { icon: 'fa-road', summary: 'Well-developed road network and a growing metro system (54km). The city is a major port, handling over 100 million tonnes of cargo annually.' },
+                            'Impacts & Accessibility': { icon: 'fa-hospital', summary: 'Known for high-quality healthcare, attracting medical tourism. Strong base for engineering education.' },
+                            'Management': { icon: 'fa-recycle', summary: 'Water management is critical, with two desalination plants producing 200 MLD. Generates ~5,200 tonnes of waste daily.' },
+                            'Development': { icon: 'fa-building', summary: 'Significant industrial and IT corridor development along the OMR. The city is expanding along the southern coast.' },
+                            'Measures & Preventions': { icon: 'fa-shield-alt', summary: 'Strong emphasis on mandatory rainwater harvesting. Coastal zone management plans are in place to mitigate climate change effects.' }
+                        }
+                    },
+                    hyderabad: {
+                        name: "Hyderabad, India",
+                        categories: {
+                            'Living Standards': { icon: 'fa-gem', summary: 'A hub for IT and pharma with a high standard of living and affordable cost. Population density is ~18,480 people/km².' },
+                            'Pollution': { icon: 'fa-industry', summary: 'Air pollution from traffic and industrial zones is a growing concern (AQI 100-160). Hussain Sagar lake shows high levels of heavy metals.' },
+                            'Infrastructure': { icon: 'fa-road', summary: 'The 158km Outer Ring Road has improved connectivity. The metro system (69km) is expanding to ease traffic congestion.' },
+                            'Impacts & Accessibility': { icon: 'fa-hospital', summary: 'A major center for healthcare and education. The HITEC City area is a major employment hub for over 500,000 IT professionals.' },
+                            'Management': { icon: 'fa-recycle', summary: 'Generates ~4,500 tonnes of waste daily, with a focus on waste-to-energy plants. Water supply from Godavari and Krishna rivers is critical.' },
+                            'Development': { icon: 'fa-building', summary: 'Rapid development of IT parks and pharma SEZs. The "Pharma City" project aims to be the world\'s largest integrated pharma park.' },
+                            'Measures & Preventions': { icon: 'fa-shield-alt', summary: 'Strategic urban planning to develop satellite townships. Promotion of green buildings (high number of LEED-certified buildings).' }
+                        }
+                    }
+                };
+
+                const regionSelect = document.getElementById('regionSelect');
+                const analysisDisplay = document.getElementById('analysis-display');
+                const analysisTitle = document.getElementById('analysis-title');
+                const analysisContent = document.getElementById('analysis-content');
+                const methodologySection = document.getElementById('methodology-section');
+
+                function generateMethodologyInsights(regionData) {
+                    const { name, categories } = regionData;
+
+                    document.getElementById('methodology-subtitle').textContent = `Based on the data for ${name}, here is how a planner might take action:`;
+                    document.getElementById('methodology-services').querySelector('p').textContent = `Given the challenges in 'Living Standards' (${categories['Living Standards'].summary.toLowerCase()}), a planner should analyze transit routes against housing density maps to identify areas needing better transportation links or affordable housing projects.`;
+                    document.getElementById('methodology-pollution').querySelector('p').textContent = `The 'Pollution' data (${categories['Pollution'].summary.toLowerCase()}) points to specific issues. Planners can use NASA's TEMPO/MODIS data to pinpoint pollution sources and recommend targeted solutions like green buffers or stricter industrial zoning.`;
+                    document.getElementById('methodology-healthcare').querySelector('p').textContent = `Based on 'Impacts & Accessibility' (${categories['Impacts & Accessibility'].summary.toLowerCase()}), planners can map existing clinics against population density to find "healthcare deserts" and propose locations for new facilities to ensure equitable access.`;
+                    methodologySection.style.display = 'block';
+                }
+
+                regionSelect.addEventListener('change', (e) => {
+                    const selectedRegion = e.target.value;
+                    if (selectedRegion && analysisData[selectedRegion]) {
+                        const data = analysisData[selectedRegion];
+                        analysisTitle.textContent = `Analysis for ${data.name}`;
+                        analysisContent.innerHTML = ''; // Clear previous content
+
+                        for (const category in data.categories) {
+                            const item = data.categories[category];
+                            const card = document.createElement('div');
+                            card.className = 'feature-card';
+                            card.innerHTML = `<i class="fas ${item.icon}"></i><h3>${category}</h3><p>${item.summary}</p>`;
+                            analysisContent.appendChild(card);
+                        }
+
+                        analysisDisplay.style.display = 'block';
+                        generateMethodologyInsights(data);
+                    } else {
+                        analysisDisplay.style.display = 'none';
+                        methodologySection.style.display = 'none';
+                    }
+                });
+            }
+
+            // --- Demo Page Logic ---
+            function initializeDemo() {
+                if (window.demoInitialized) return;
+                window.demoInitialized = true;
+
+                const currentLocationBtn = document.getElementById('currentLocationBtn');
+                const manualLocationBtn = document.getElementById('manualLocationBtn');
+                const manualLocationInput = document.getElementById('manualLocationInput');
+                const locationSuggestions = document.getElementById('locationSuggestions');
+    
+                const map = L.map('interactive-city-map').setView([34.0522, -118.2437], 12);
+                window.demoMap = map; // Store map instance globally to check for initialization
+                const chatMessages = document.getElementById('chatMessages');
+                const chatInput = document.getElementById('chatInput');
+                const chatSendBtn = document.getElementById('chatSendBtn');
+                const chatPopupBtn = document.getElementById('chatPopupBtn');
+                const chatbotContainer = document.getElementById('chatbot');
+                const closeChatBtn = document.getElementById('closeChatBtn');
+                let aiReportTimeout;
+                const notificationSound = document.getElementById('notificationSound');
+                const aiReportPopupBtn = document.getElementById('aiReportPopupBtn');
+                const aiReportContainer = document.getElementById('aiReport');
+                const closeAiReportBtn = document.getElementById('closeAiReportBtn');
+
+                // Chatbot popup toggle logic
+                chatPopupBtn.addEventListener('click', () => chatbotContainer.classList.toggle('active'));
+                closeChatBtn.addEventListener('click', () => chatbotContainer.classList.remove('active'));
+
+                function showAiReport() {
+                    if (aiReportTimeout) clearTimeout(aiReportTimeout);
+                    aiReportContainer.classList.add('active');
+                    aiReportTimeout = setTimeout(() => {
+                        aiReportContainer.classList.remove('active');
+                    }, 10000);
+                }
+
+                // AI Report popup toggle logic
+                aiReportPopupBtn.addEventListener('click', showAiReport);
+                closeAiReportBtn.addEventListener('click', () => {
+                    if (aiReportTimeout) clearTimeout(aiReportTimeout);
+                    aiReportContainer.classList.remove('active');
+                });
+
+                // Pre-load the notification sound into the audio buffer
+                // This is done once to be ready for playback.
+                function loadSound() {
+                    if (!audioContext || !notificationSound) return;
+                    fetch(notificationSound.querySelector('source').src)
+                        .then(response => response.arrayBuffer())
+                        .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
+                        .then(audioBuffer => {
+                            notificationAudioBuffer = audioBuffer;
+                            console.log("Notification sound loaded successfully.");
+                        })
+                        .catch(e => console.error("Error loading notification sound:", e));
+                }
+
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+                setTimeout(() => {
+                    map.invalidateSize();
+                }, 10); // Delay to ensure container is visible before resizing
+    
+                const legend = L.control({ position: 'bottomright' });
+    
+                legend.onAdd = function (map) {
+                    const div = L.DomUtil.create('div', 'info legend');
+                    return div;
+                };
+    
+                legend.addTo(map);
+    
+                let locationMarker;
+                let poiMarkers = []; // To store POI markers
+                let currentLocation = { name: 'Los Angeles, CA', lat: 34.0522, lng: -118.2437 };
+                let chatHistory = [];
+                let skipInitialAnalysis = false;
+
+                // --- Dynamic Backend URL ---
+                // This determines the correct API path for local development vs. deployed site.
+                const apiBaseUrl = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:') ? 'http://localhost:3001' : '';
+                
+                // The Gemini API key is now used on the server.
+
+            // Create a slightly larger icon for the main location
+            const mainLocationIcon = L.icon({
+                iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+                iconSize: [30, 48], // Larger than default [25, 41]
+                iconAnchor: [15, 48],
+                popupAnchor: [0, -48]
+            });
+
+            function updateFromSelections(addMarker = false) {
+                const loc = currentLocation;
+
+                if (!loc) return;
+
+                // Initialize AudioContext on the first user interaction
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    loadSound(); // Load the sound into the buffer now that context is unlocked
+                }
+
+                // Update info panel
+                const currentLocationEl = document.getElementById('currentLocation');
+                const coordinatesEl = document.getElementById('coordinates');
+                const lastUpdateEl = document.getElementById('lastUpdate');
+                const dataStatusEl = document.getElementById('dataStatus');
+
+                // Show the AI Report and Chat buttons now that a location is selected
+                const aiReportPopupBtn = document.getElementById('aiReportPopupBtn');
+                const chatPopupBtn = document.getElementById('chatPopupBtn');
+                if (aiReportPopupBtn) aiReportPopupBtn.style.display = 'flex';
+                if (chatPopupBtn) chatPopupBtn.style.display = 'flex';
+
+                if (currentLocationEl) currentLocationEl.textContent = loc.name;
+                if (coordinatesEl) coordinatesEl.textContent = `${loc.lat.toFixed(4)}, ${loc.lng.toFixed(4)}`;
+                if (dataStatusEl) dataStatusEl.textContent = 'Ready';
+
+                if (addMarker) {
+                    if (locationMarker) {
+                        map.removeLayer(locationMarker);
+                    }
+                    locationMarker = L.marker([loc.lat, loc.lng], { icon: mainLocationIcon })
+                        .addTo(map)
+                        .bindPopup(`<b>Selected Location:</b><br>${loc.name}`)
+                        .openPopup();
+                }
+
+                map.setView([loc.lat, loc.lng], 12);
+
+                // Show initial loading state for AI report
+                const reportContainer = document.getElementById('aiReport');
+                const reportContent = document.getElementById('aiReportContent');
+                if (reportContent) reportContent.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Fetching environmental data...</p>';
+
+                // Fetch all data and then run analysis
+                Promise.allSettled([
+                    fetchAirQualityData(loc.lat, loc.lng),
+                    fetchCurrentWeatherData(loc.lat, loc.lng),
+                    fetchForecastWeatherData(loc.lat, loc.lng)
+                ]).then((results) => {
+                    const [airData, weatherData, forecastData] = results.map(r => r.status === 'fulfilled' ? r.value : null);
+                    runInitialAiAnalysis(airData, weatherData, forecastData);
+                }).catch(error => {
+                    console.error("Failed to fetch all data for AI analysis:", error);
+                    const reportContent = document.getElementById('aiReportContent');
+                    if (reportContent) {
+                        reportContent.innerHTML = `<p class="report-finding error"><i class="fas fa-exclamation-triangle"></i> Could not fetch all required data for analysis. Please try again.</p>`;
+                    }
+                });
+            }
+
+            function getCurrentLocation() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            const lat = position.coords.latitude;
+                            const lng = position.coords.longitude;
+                            currentLocation = { name: `Current Location (${lat.toFixed(4)}, ${lng.toFixed(4)})`, lat, lng };
+                            document.getElementById('currentLocation').textContent = currentLocation.name;
+                            updateFromSelections(true);
+                        },
+                        (error) => {
+                            alert('Error getting current location: ' + error.message);
+                        }
+                    );
+                } else {
+                    alert('Geolocation is not supported by this browser.');
+                }
+            }
+
+            function fetchAirQualityData(lat, lng) {
+                const airQualityDataEl = document.getElementById('airQualityData');
+                const lastUpdateEl = document.getElementById('lastUpdate');
+
+                if (airQualityDataEl) airQualityDataEl.innerHTML = '<p>Fetching air quality data...</p>';
+                if (lastUpdateEl) lastUpdateEl.textContent = '...';
+
+                return new Promise((resolve, reject) => {
+                    // Calls our new backend endpoint
+                    const apiUrl = `${apiBaseUrl}/weather/air-quality?lat=${lat}&lon=${lng}`;
+
+                    fetch(apiUrl)
+                        .then(response => {
+                            if (!response.ok) {
+                                return response.json().then(err => { throw new Error(err.error || `Server error: ${response.status}`) });
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.list && data.list.length > 0) {
+                                const aqi = data.list[0].main.aqi;
+                                const components = data.list[0].components;
+                                let status = 'Unknown';
+                const aqiMap = {
+                    1: 'Good',
+                    2: 'Moderate',
+                    3: 'Unhealthy for Sensitive Groups',
+                    4: 'Unhealthy',
+                    5: 'Very Unhealthy',
+                    6: 'Hazardous'
+                };
+                                status = aqiMap[aqi] || 'Unknown';
+
+                                let html = `<p><strong>AQI:</strong> ${aqi} (${status})</p>`;
+                                html += '<h5>Pollutant Concentration (μg/m³):</h5>';
+                                html += '<ul class="pollutant-list">';
+                                html += `<li><strong>CO:</strong> ${components.co}</li>`;
+                                html += `<li><strong>NO:</strong> ${components.no}</li>`;
+                                html += `<li><strong>NO₂:</strong> ${components.no2}</li>`;
+                                html += `<li><strong>O₃:</strong> ${components.o3}</li>`;
+                                html += `<li><strong>SO₂:</strong> ${components.so2}</li>`;
+                                html += `<li><strong>PM2.5:</strong> ${components.pm2_5}</li>`;
+                                html += `<li><strong>PM10:</strong> ${components.pm10}</li>`;
+                                html += `<li><strong>NH₃:</strong> ${components.nh3}</li>`;
+                                html += '</ul>';
+
+                                if (airQualityDataEl) airQualityDataEl.innerHTML = html;
+                                if (lastUpdateEl) lastUpdateEl.textContent = new Date().toLocaleString();
+
+                                // Update AQI meter needle and display
+                                updateAqiMeter(aqi, status);
+
+                                // Trigger notification based on AQI
+                                if (aqi > 3) {
+                                    showNotification('<i class="fas fa-head-side-mask"></i> <strong>High AQI:</strong> Wear a mask & limit outdoor activity.', 'warning');
+                                }
+
+                                // Resolve the promise with the fetched data
+                                resolve(data.list[0]);
+                            } else {
+                                throw new Error('No air quality data returned.');
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Error fetching air quality data:', err);
+                            if (airQualityDataEl) {
+                                airQualityDataEl.innerHTML = '<p>Could not fetch air quality data.</p>';
+                            }
+                            if (lastUpdateEl) lastUpdateEl.textContent = new Date().toLocaleString();
+
+                            L.popup()
+                              .setLatLng([lat, lng])
+                              .setContent(`Could not fetch Air Quality data.<br>Error: ${err.message}`)
+                              .openOn(map);
+                            reject(err);
+                        });
+                });
+            }
+
+            // Function to update the AQI meter needle and display
+            function updateAqiMeter(aqi, status) {
+                const needle = document.querySelector('.aqi-needle');
+                const numericValue = document.querySelector('.aqi-numeric-value');
+                const statusText = document.querySelector('.aqi-status-text');
+                const meterContainer = document.getElementById('aqiMeterContainer');
+
+                if (!needle || !numericValue || !statusText || !meterContainer) return;
+
+                // Show the meter container first
+                meterContainer.style.display = 'block';
+
+                // Map AQI 1-5 to degrees from -90 to 90 (semi-circle)
+                // 1 = -90deg (far left), 5 = 90deg (far right)
+                const degrees = ((aqi - 1) / 5) * 180 - 90;
+
+                needle.classList.remove('moving');
+
+                // Rotate the needle
+                needle.style.transform = `translateX(-50%) rotate(${degrees}deg)`;
+
+                // Update numeric value and status text
+                numericValue.textContent = aqi;
+                statusText.textContent = status;
+
+                // Add the moving class after a short delay to ensure animation plays
+                setTimeout(() => {
+                    needle.classList.add('moving');
+                }, 50);
+            }
+
+            function updateLegend(weather) {
+                const legendDiv = document.querySelector('.info.legend');
+                if (!legendDiv) return;
+
+                const main = weather.main;
+                const description = weather.description;
+
+                let animationHtml = '';
+                let weatherTitle = main;
+
+                switch (main) {
+                    case 'Rain': // Fall-through
+                    case 'Drizzle':
+                        animationHtml = `
+                            <div class="cloud base"></div>
+                            <div class="cloud middle"></div>
+                            <div class="cloud top"></div>
+                            <div class="rain"></div>
+                        `;
+                        weatherTitle = main;
+                        break;
+                    case 'Clouds':
+                        animationHtml = `
+                            <div class="cloud base"></div>
+                            <div class="cloud middle"></div>
+                            <div class="cloud top"></div>
+                        `;
+                        break;
+                    case 'Clear':
+                        animationHtml = '<div class="sun"></div>';
+                        weatherTitle = 'Clear Sky';
+                        break;
+                    case 'Snow':
+                        animationHtml = '<div class="snow"></div>';
+                        break;
+                    case 'Thunderstorm':
+                        animationHtml = '<div class="thunderstorm"></div>';
+                        break;
+                    case 'Mist':
+                    case 'Smoke':
+                    case 'Haze':
+                    case 'Dust':
+                    case 'Fog':
+                    case 'Sand':
+                    case 'Ash':
+                    case 'Squall':
+                    case 'Tornado':
+                        animationHtml = '<div class="fog"></div>';
+                        weatherTitle = 'Low Visibility';
+                        break;
+                    default:
+                        animationHtml = `<p style="text-align:center; padding-top: 20px;">${main}</p>`;
+                }
+
+                legendDiv.innerHTML = `<h4>${weatherTitle}</h4><div class="weather-animation-container">${animationHtml}</div><p style="text-align:center; font-size: 0.9rem; margin:0;">${description}</p>`;
+
+                // If it's raining, dynamically add raindrop elements
+                if (main === 'Rain' || main === 'Drizzle') {
+                    const rainContainer = legendDiv.querySelector('.rain');
+                    if (rainContainer) {
+                        for (let i = 0; i < 50; i++) {
+                            const drop = document.createElement('div');
+                            drop.className = 'raindrop';
+                            drop.style.left = `${Math.random() * 100}%`;
+                            drop.style.animationDuration = `${0.5 + Math.random() * 0.5}s`;
+                            drop.style.animationDelay = `${Math.random() * 2}s`;
+                            rainContainer.appendChild(drop);
+                        }
+                    }
+                }
+            }
+
+            function fetchCurrentWeatherData(lat, lng) {
+                const weatherDataEl = document.getElementById('weatherData');
+                if (weatherDataEl) weatherDataEl.innerHTML = '<p>Fetching weather data...</p>';
+
+                return new Promise((resolve, reject) => {
+                    // Calls our new backend endpoint
+                    const apiUrl = `${apiBaseUrl}/weather/current?lat=${lat}&lon=${lng}`;
+
+                    fetch(apiUrl)
+                        .then(response => {
+                            if (!response.ok) {
+                                return response.json().then(err => { throw new Error(err.error || `Server error: ${response.status}`) });
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.main && data.wind && data.weather && data.weather.length > 0) {
+                                const temp = data.main.temp;
+                                const humidity = data.main.humidity;
+                                const pressure = data.main.pressure;
+                                const windSpeed = data.wind.speed;
+                                const windDeg = data.wind.deg;
+
+                                let html = '<ul class="pollutant-list">'; // Re-using the style for a consistent look
+                                html += `<li><strong>Temperature:</strong> ${temp}°C</li>`;
+                                html += `<li><strong>Humidity:</strong> ${humidity}%</li>`;
+                                html += `<li><strong>Pressure:</strong> ${pressure} hPa</li>`;
+                                html += `<li><strong>Wind:</strong> ${windSpeed} m/s at ${windDeg}°</li>`;
+                                html += '</ul>';
+
+                                if (weatherDataEl) weatherDataEl.innerHTML = html;
+                                
+                                // Update the legend with the weather animation
+                                updateLegend(data.weather[0]);
+
+                                // Trigger notification based on weather
+                                const weatherCondition = data.weather[0].main;
+                                if (['Rain', 'Drizzle', 'Thunderstorm'].includes(weatherCondition)) {
+                                    showNotification('<i class="fas fa-umbrella"></i> <strong>Rain Alert:</strong> Carry an umbrella & drive safely.', 'warning');
+                                }
+                                
+                                // Add more notifications for other conditions
+                                if (data.main.temp > 35) {
+                                    showNotification('<i class="fas fa-thermometer-three-quarters"></i> <strong>Heat Advisory:</strong> Stay hydrated and avoid prolonged sun exposure.', 'warning');
+                                }
+
+                                if (data.wind.speed > 10) { // 10 m/s is ~36 km/h or 22 mph
+                                    showNotification('<i class="fas fa-wind"></i> <strong>High Winds:</strong> Secure loose objects and be cautious when traveling.', 'warning');
+                                }
+
+                                const lowVisibilityConditions = ['Mist', 'Smoke', 'Haze', 'Dust', 'Fog', 'Sand', 'Ash', 'Squall'];
+                                if (lowVisibilityConditions.includes(weatherCondition)) {
+                                    showNotification('<i class="fas fa-eye-slash"></i> <strong>Low Visibility:</strong> Drive with caution and use your headlights.', 'warning');
+                                }
+
+
+
+                                resolve(data);
+                            } else {
+                                throw new Error('Incomplete weather data returned.');
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Error fetching current weather data:', err);
+                            if (weatherDataEl) {
+                                weatherDataEl.innerHTML = '<p>Could not fetch weather data.</p>';
+                            }
+                            reject(err);
+                        });
+                });
+            }
+
+            function processForecastData(forecast) {
+                if (!forecast || !forecast.list) return null;
+
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                const tomorrowDateString = tomorrow.toISOString().split('T')[0];
+
+                const tomorrowsForecasts = forecast.list.filter(item => item.dt_txt.startsWith(tomorrowDateString));
+
+                if (tomorrowsForecasts.length === 0) return "No forecast data available for tomorrow.";
+
+                // Find min/max temps for tomorrow
+                let minTemp = tomorrowsForecasts[0].main.temp;
+                let maxTemp = tomorrowsForecasts[0].main.temp;
+                const weatherConditions = new Set();
+
+                for (const f of tomorrowsForecasts) {
+                    if (f.main.temp < minTemp) minTemp = f.main.temp;
+                    if (f.main.temp > maxTemp) maxTemp = f.main.temp;
+                    weatherConditions.add(f.weather[0].main);
+                }
+
+                let summary = `Tomorrow's forecast includes a high of ${maxTemp.toFixed(1)}°C and a low of ${minTemp.toFixed(1)}°C. `;
+                summary += `Conditions will include: ${[...weatherConditions].join(', ')}.`;
+
+                return summary;
+            }
+
+            function fetchForecastWeatherData(lat, lng) {
+                return new Promise((resolve, reject) => {
+                    // Calls our new backend endpoint
+                    const apiUrl = `${apiBaseUrl}/weather/forecast?lat=${lat}&lon=${lng}`;
+
+                    fetch(apiUrl)
+                        .then(response => {
+                            if (!response.ok) {
+                                return response.json().then(err => { throw new Error(err.error || `Server error: ${response.status}`) });
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data && data.list) {
+                                resolve(data);
+                            } else {
+                                throw new Error('Incomplete forecast data returned.');
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Error fetching weather forecast data:', err);
+                            // Don't show a popup for this, as it's a background task for the AI
+                            reject(err);
+                        });
+                });
+            }
+
+            async function runInitialAiAnalysis(airData, weatherData, forecastData) {
+                const reportContainer = document.getElementById('aiReport');
+                const reportContent = document.getElementById('aiReportContent');
+                if (!reportContainer || !reportContent) return;
+
+                reportContent.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Sending data for AI analysis...</p>';
+                showAiReport(); // Open the popup to show analysis, it will auto-close
+
+                if (!airData || !weatherData) {
+                    reportContent.innerHTML = `<p class="report-finding error"><i class="fas fa-exclamation-triangle"></i> Could not fetch all required data for analysis. Please try again.</p>`;
+                    return;
+                }
+
+                // Prepare the initial prompt for the AI
+                let analysisPrompt = `
+                    You are an environmental data analyst for the location: ${currentLocation.name}.
+                    Your task is to analyze the provided data and answer user questions.
+                    
+                    First, provide a brief, easy-to-understand summary (2-3 sentences) of the current conditions for a general audience. Explain what the AQI means and mention any notable pollutants or weather conditions.
+
+                    Here is the available data:
+                    Air Quality Data:
+                    - Air Quality Index (AQI): ${airData.main.aqi} (where 1=Good, 2=Fair, 3=Moderate, 4=Poor, 5=Very Poor)
+                    - PM2.5: ${airData.components.pm2_5} μg/m³
+                    - PM10: ${airData.components.pm10} μg/m³
+                    - Ozone (O₃): ${airData.components.o3} μg/m³
+                    - Nitrogen Dioxide (NO₂): ${airData.components.no2} μg/m³
+                `;
+                
+                // Add weather data to the prompt
+                analysisPrompt += `
+                    Current Weather Data:
+                    - Temperature: ${weatherData.main.temp}°C
+                    - Condition: ${weatherData.weather[0].main} (${weatherData.weather[0].description})
+                    - Humidity: ${weatherData.main.humidity}%
+                    - Pressure: ${weatherData.main.pressure} hPa
+                    - Wind: ${weatherData.wind.speed} m/s at ${weatherData.wind.deg}°
+                `;
+
+                // Add forecast data to the prompt if available
+                const forecastSummary = processForecastData(forecastData);
+                if (forecastSummary) {
+                    analysisPrompt += `\nWeather Forecast for Tomorrow: ${forecastSummary}`;
+                }
+
+                // Add user and model parts to history for the initial analysis
+                chatHistory.push({ role: 'user', parts: [{ text: analysisPrompt }] });
+
+                try {
+                    // The backendUrl should point to where your server.js is running.
+                    // Use a relative path for production. It will point to your Netlify function.
+                    const backendUrl = `${apiBaseUrl}/analyze`;
+
+                    const response = await fetch(backendUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ history: chatHistory })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || `Server error: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+
+                    reportContent.innerHTML = `<p>${result.summary}</p>`;
+                    chatInput.disabled = false;
+
+                    // Add the AI's first response to the history
+                    chatHistory.push({ role: 'model', parts: [{ text: result.summary }] });
+
+                    // Add a welcome message to the chat UI
+                    let locationDisplayName = currentLocation.name.startsWith('Current Location')
+                        ? 'Current Location'
+                        : currentLocation.name.split(',')[0];
+
+                    showNotification(`<i class="fas fa-check-circle"></i> <strong>Analysis Complete:</strong> AI report and chat are ready.`, 'success');
+                    chatMessages.innerHTML = ''; // Clear initial message
+                    appendMessageToChat('assistant', `**Analysis for ${locationDisplayName} is complete.** You can now ask follow-up questions about the air quality or weather.`);
+
+                } catch (error) {
+                    console.error('Failed to get AI analysis from backend:', error);
+                    reportContent.innerHTML = `<p class="report-finding error"><i class="fas fa-exclamation-triangle"></i> AI analysis failed. ${error.message}. Make sure your backend server is running.</p>`;
+                    appendMessageToChat('assistant', `AI analysis is unavailable. Error: ${error.message}`);
+                    chatInput.disabled = true;
+                } finally {
+                    // Add suggested questions regardless of success or failure (if chat is enabled)
+                    if (!chatInput.disabled) {
+                        const suggestionsContainer = document.createElement('div');
+                        suggestionsContainer.className = 'suggested-questions';
+                        const questions = generateSuggestedQuestions(airData, weatherData, forecastData);
+
+                        questions.forEach(q => {
+                            const qEl = document.createElement('div');
+                            qEl.className = 'suggested-question';
+                            qEl.textContent = q;
+                            qEl.onclick = () => {
+                                chatInput.value = q;
+                                handleChatSubmit();
+                            };
+                            suggestionsContainer.appendChild(qEl);
+                        });
+
+                        const chatbotContainer = document.getElementById('chatbot');
+                        // Remove old suggestions if any
+                        chatbotContainer.querySelector('.suggested-questions')?.remove();
+                        chatbotContainer.appendChild(suggestionsContainer);
+                    }
+                }
+            }
+
+            function generateSuggestedQuestions(airData, weatherData, forecastData) {
+                const questions = new Set();
+
+                // Add a forecast question if data is available
+                if (forecastData) {
+                    questions.add("What will the weather be like tomorrow?");
+                }
+
+                // Add questions based on Air Quality
+                if (airData) {
+                    if (airData.main.aqi > 3) {
+                        questions.add("Why is the air quality poor today?");
+                    } else {
+                        questions.add("Is the air quality safe for outdoor activities?");
+                    }
+
+                    if (airData.components.pm2_5 > 35) { // WHO guideline is lower, but this is for "high"
+                        questions.add("What are the health risks of the current PM2.5 level?");
+                    } else {
+                        questions.add("Explain the PM2.5 level in simple terms.");
+                    }
+                }
+
+                // Add a generic question if we still don't have enough
+                if (questions.size < 3) {
+                    questions.add("What is the main pollutant of concern right now?");
+                }
+
+                // Return the first 3 unique questions
+                return Array.from(questions).slice(0, 3);
+            }
+
+            function appendMessageToChat(sender, text) {
+                const messageEl = document.createElement('div');
+                messageEl.classList.add('chat-message', `${sender}-message`);
+                // Basic markdown for bolding
+                text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                
+                messageEl.innerHTML = text;
+                chatMessages.appendChild(messageEl);
+                chatMessages.scrollTop = chatMessages.scrollHeight; // Auto-scroll to bottom
+            }
+
+            async function handleChatSubmit() {
+                const userText = chatInput.value.trim();
+                if (!userText) return;
+
+                appendMessageToChat('user', userText);
+                chatInput.value = '';
+
+                // Add user message to history
+                chatHistory.push({ role: 'user', parts: [{ text: userText }] });
+
+                // Show loading indicator
+                const loadingEl = document.createElement('div');
+                loadingEl.classList.add('chat-message', 'assistant-message', 'loading');
+                loadingEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                chatMessages.appendChild(loadingEl);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                try {
+                    const backendUrl = `${apiBaseUrl}/analyze`;
+
+                    const response = await fetch(backendUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ history: chatHistory })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || `Server error: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    const summary = result.summary;
+                    
+                    // Remove loading indicator and show response
+                    chatMessages.removeChild(loadingEl);
+                    appendMessageToChat('assistant', result.summary);
+
+                    // Add AI response to history
+                    chatHistory.push({ role: 'model', parts: [{ text: summary }] });
+
+                } catch (error) {
+                    chatMessages.removeChild(loadingEl);
+                    appendMessageToChat('assistant', `Sorry, I could not connect to the AI service. Please ensure the backend server is running. Error: ${error.message}`);
+                    console.error('Failed to get chat response from backend:', error);
+                }
+            }
+
+            function geocodeLocation(locationName) {
+                const apiUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationName)}&limit=1&addressdetails=1`;
+                fetch(apiUrl)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.length > 0) {
+                            const lat = parseFloat(data[0].lat);
+                            const lng = parseFloat(data[0].lon);
+                            currentLocation = { name: data[0].display_name, lat, lng };
+                            updateFromSelections(true);
+                        } else {
+                            alert('Location not found. Please try again.');
+                        }
+                    })
+                    .catch(err => {
+                        alert('Error geocoding location: ' + err.message);
+                    });
+            }
+
+            function fetchLocationSuggestions(query) {
+                if (query.length < 2) {
+                    hideSuggestions();
+                    return;
+                }
+
+                const apiUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5&addressdetails=1`;
+                fetch(apiUrl)
+                    .then(response => response.json())
+                    .then(data => {
+                        displaySuggestions(data);
+                    })
+                    .catch(err => {
+                        console.error('Error fetching suggestions:', err);
+                        hideSuggestions();
+                    });
+            }
+
+            function displaySuggestions(suggestions) {
+                if (suggestions.length === 0) {
+                    hideSuggestions();
+                    return;
+                }
+
+                locationSuggestions.innerHTML = '';
+
+                suggestions.forEach((suggestion, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'suggestion-item';
+                    div.innerHTML = `
+                        <div class="suggestion-name">${suggestion.display_name}</div>
+                        <div class="suggestion-type">${suggestion.type || 'location'}</div>
+                    `;
+
+                    div.addEventListener('click', () => {
+                        selectSuggestion(suggestion);
+                    });
+
+                    locationSuggestions.appendChild(div);
+                });
+
+                locationSuggestions.style.display = 'block';
+            }
+
+            function hideSuggestions() {
+                locationSuggestions.style.display = 'none';
+                locationSuggestions.innerHTML = '';
+            }
+
+            function selectSuggestion(suggestion) {
+                if (manualLocationInput) {
+                    manualLocationInput.value = suggestion.display_name;
+                    // Trigger input event to ensure the change is recognized
+                    manualLocationInput.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+                hideSuggestions();
+                geocodeLocation(suggestion.display_name);
+            }
+
+            let suggestionTimeout;
+            if (manualLocationInput) {
+                manualLocationInput.addEventListener('input', (e) => {
+                    clearTimeout(suggestionTimeout);
+                    suggestionTimeout = setTimeout(() => {
+                        fetchLocationSuggestions(e.target.value.trim());
+                    }, 300);
+                });
+
+                manualLocationInput.addEventListener('focus', () => {
+                    if (manualLocationInput.value.trim().length >= 2) {
+                        fetchLocationSuggestions(manualLocationInput.value.trim());
+                    }
+                });
+
+                manualLocationInput.addEventListener('blur', () => {
+                    // Delay hiding suggestions to allow for clicks
+                    setTimeout(hideSuggestions, 200);
+                });
+
+                // Handle keyboard navigation
+                manualLocationInput.addEventListener('keydown', (e) => {
+                    const suggestions = locationSuggestions.querySelectorAll('.suggestion-item');
+                    if (suggestions.length === 0) return;
+
+                    let currentIndex = -1;
+                    suggestions.forEach((item, index) => {
+                        if (item.classList.contains('highlighted')) {
+                            currentIndex = index;
+                        }
+                    });
+
+                    switch (e.key) {
+                        case 'ArrowDown':
+                            e.preventDefault();
+                            if (currentIndex < suggestions.length - 1) {
+                                if (currentIndex >= 0) {
+                                    suggestions[currentIndex].classList.remove('highlighted');
+                                }
+                                currentIndex++;
+                                suggestions[currentIndex].classList.add('highlighted');
+                            }
+                            break;
+                        case 'ArrowUp':
+                            e.preventDefault();
+                            if (currentIndex > 0) {
+                                suggestions[currentIndex].classList.remove('highlighted');
+                                currentIndex--;
+                                suggestions[currentIndex].classList.add('highlighted');
+                            }
+                            break;
+                        case 'Enter':
+                            e.preventDefault();
+                            if (currentIndex >= 0) {
+                                selectSuggestion({
+                                    display_name: suggestions[currentIndex].querySelector('.suggestion-name').textContent
+                                });
+                            }
+                            break;
+                        case 'Escape':
+                            hideSuggestions();
+                            break;
+                    }
+                });
+            }
+
+            currentLocationBtn.addEventListener('click', getCurrentLocation);
+            if (manualLocationInput) {
+                manualLocationBtn.addEventListener('click', () => {
+                    const locationName = manualLocationInput.value.trim();
+                    if (locationName) {
+                        geocodeLocation(locationName);
+                    } else {
+                        alert('Please enter a location.');
+                    }
+                });
+            }
+
+            chatSendBtn.addEventListener('click', handleChatSubmit);
+            chatInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleChatSubmit();
+                }
+            });
+
+            // Initial load for demo if it's the active tab
+            if (document.getElementById('demo').classList.contains('active')) {
+                initializeDemo();
+            }
+          }
+
+          // Initial login check
+          checkLoginStatus();
+        });
+
+        // Add notification styles dynamically
+        // The old dynamic style injection is no longer needed as styles are in the main <style> tag.
+    </script>
+    <script src="lib/app.js"></script>
 </body>
 </html>
