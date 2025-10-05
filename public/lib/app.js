@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const serverless = require('serverless-http');
 const bodyParser = require('body-parser');
 const OpenAI = require('openai');
 const axios = require('axios');
@@ -116,8 +117,9 @@ app.get('/weather/air-quality', async (req, res) => {
 
 
 // Test route for debugging
-app.get('/test', (req, res) => {
+app.get('/.netlify/functions/app/test', (req, res) => {
   res.json({ message: 'Server is running', timestamp: new Date().toISOString() });
 });
 
-module.exports = app;
+// Wrap the app for serverless deployment
+module.exports.handler = serverless(app);
