@@ -117,7 +117,7 @@ app.get('/weather/air-quality', async (req, res) => {
 
 
 // Test route for debugging
-app.get('/.netlify/functions/app/test', (req, res) => {
+app.get('/test', (req, res) => {
   res.json({ message: 'Server is running', timestamp: new Date().toISOString() });
 });
 

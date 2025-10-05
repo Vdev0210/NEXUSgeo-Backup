@@ -2,3 +2,9 @@
   command = "npm install"
   publish = "public"
   functions = "netlify/functions"
+
+# Redirect rule for Single Page Applications
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
