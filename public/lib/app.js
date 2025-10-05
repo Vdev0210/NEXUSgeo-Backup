@@ -10,11 +10,6 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// Serve static files only for local development
-if (process.env.NODE_ENV !== 'production') {
-  app.use(express.static('public'));
-}
-
 let openai;
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 if (OPENAI_API_KEY) {
